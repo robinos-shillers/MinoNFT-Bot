@@ -12,7 +12,7 @@ spreadsheet = client.open("Mino Football Earnings - 2024/25")
 
 # Get sheet references dynamically
 sheet_names = {sheet.title: sheet for sheet in spreadsheet.worksheets()}
-player_list_sheet = sheet_names.get("Player list")
+player_list_sheet = sheet_names.get("Player List")
 
 def get_player_info(player_name):
     """Retrieve player details from Player List."""
