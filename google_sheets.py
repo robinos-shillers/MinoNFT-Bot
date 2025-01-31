@@ -17,7 +17,12 @@ player_list_sheet = sheet_names.get("Player List")
 def get_player_info(player_name):
     """Retrieve player details from Player List."""
     df = pd.DataFrame(player_list_sheet.get_all_records())
-    player_data = df[df["Player"].str.lower() == player_name.lower()]
+    # Print columns for debugging
+    print("Available columns:", df.columns.tolist())
+    
+    # Try to find the player column
+    player_column = [col for col in df.columns if 'player' in col.lower()][0]
+    player_data = df[df[player_column].str.lower() == player_name.lower()]
 
     if player_data.empty:
         return None
