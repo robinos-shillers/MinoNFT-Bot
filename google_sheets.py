@@ -29,4 +29,4 @@ def get_player_info(player_name):
 
     info = player_data.iloc[0]
     return (f"🔹 *{info['Player']}* 🔹\n🎭 Rarity: {info['Rarity']}\n⚽ Position: {info['Position']}\n"
-            f"🏟️ Club: {info['Club']}\n🌍 Country: {info['Country']}\n💰 Yearly Earnings: {info['Total Yearly Earnings']} sTLOS")
+            f"🏟️ Club: {info['Club']}\n🌍 Country: {info['Country']}\n💰 Total Earnings: {info['Total Earnings']} ")

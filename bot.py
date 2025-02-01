@@ -3,7 +3,7 @@ from telegram.ext import Application, CommandHandler, ContextTypes
 from telegram import Update
 from google_sheets import get_player_info
 
-TOKEN = "7258778385:AAG9k6-RYAk7uH9tw0qGuXjkHSHcMeuf_4s"
+TOKEN = "TELEGRAM_BOT_TOKEN"
 
 async def player_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle /player command."""
