@@ -9,31 +9,24 @@ client = gspread.authorize(creds)
 
 # Open the Google Spreadsheet
 spreadsheet = client.open("Mino Football Earnings - 2024/25")
-player_list_sheet = spreadsheet.worksheet("Player List")
+
+# Get sheet references dynamically
+sheet_names = {sheet.title: sheet for sheet in spreadsheet.worksheets()}
+player_list_sheet = sheet_names.get("Player List")
 
 def get_player_info(player_name):
-    """Retrieve player details and NFT video link."""
+    """Retrieve player details from Player List."""
     df = pd.DataFrame(player_list_sheet.get_all_records())
-
-    # Find player info
-    player_data = df[df["Player Name"].str.lower() == player_name.lower()]
+    # Print columns for debugging
+    print("Available columns:", df.columns.tolist())
+    
+    # Try to find the player column
+    player_column = [col for col in df.columns if 'player' in col.lower()][0]
+    player_data = df[df[player_column].str.lower() == player_name.lower()]
 
     if player_data.empty:
         return None
 
     info = player_data.iloc[0]
-
-    # Prepare player details
-    info_text = (
-        f"🔹 *{info['Player Name']}* 🔹\n"
-        f"🎭 Rarity: {info['Rarity']}\n"
-        f"⚽ Position: {info['Position']}\n"
-        f"🏟️ Club: {info['Club']}\n"
-        f"🌍 Country: {info['Country']}\n"
-        f"💰 Yearly Earnings: {info['Total Yearly Earnings']} sTLOS"
-    )
-
-    # Get the video link
-    video_link = info.get("LINK", None)
-
-    return info_text, video_link
+    return (f"🔹 *{info['Player']}* 🔹\n🎭 Rarity: {info['Rarity']}\n⚽ Position: {info['Position']}\n"
+            f"🏟️ Club: {info['Club']}\n🌍 Country: {info['Country']}\n💰 Total Earnings: {info['Total Earnings']} ")
