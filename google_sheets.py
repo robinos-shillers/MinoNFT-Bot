@@ -30,7 +30,7 @@ def get_player_info(player_name):
         f"⚽ Position: {info['Position']}\n"
         f"🏟️ Club: {info['Club']}\n"
         f"🌍 Country: {info['Country']}\n"
-        f"💰 Yearly Earnings: {info['Total Yearly Earnings']} sTLOS"
+        f"💰 Total Earnings: {info['Total Earnings']}"
     )
 
     # Get the video link from the "LINK" column
