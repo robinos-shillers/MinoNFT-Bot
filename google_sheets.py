@@ -35,20 +35,10 @@ def get_all_players():
         (df['Player'].notnull()) &
         (df['Player'].str.strip() != '')
     ]
+
     logging.info(f"Active players after filtering: {len(active_players)}")
+    logging.info(f"Sample active players: {active_players['Player'].head().tolist()}")
     return active_players
-
-
-# ✅ Get Retired Players
-def get_retired_players():
-    """Retrieve retired players."""
-    df = pd.DataFrame(player_list_sheet.get_all_records())
-    retired_players = df[
-        (df['Club'].str.contains('Retired', case=False, na=False)) |
-        (df['Country'].str.contains('Retired', case=False, na=False))
-    ]
-    logging.info(f"Retired players found: {len(retired_players)}")
-    return retired_players
 
 
 # ✅ Get Unique Filter Values
@@ -82,6 +72,7 @@ def get_players_by_filter(field, value):
     value = value.strip().lower()
 
     logging.info(f"Filtering players where {field} = '{value}'")
+    logging.info(f"Available values for {field}: {df[field].unique()}")
 
     if field in df.columns:
         filtered_df = df[df[field] == value]
@@ -92,6 +83,18 @@ def get_players_by_filter(field, value):
     else:
         logging.warning(f"Field '{field}' not found in data.")
     return []
+
+
+# ✅ Get Retired Players
+def get_retired_players():
+    """Retrieve retired players."""
+    df = pd.DataFrame(player_list_sheet.get_all_records())
+    retired_players = df[
+        (df['Club'].str.contains('Retired', case=False, na=False)) |
+        (df['Country'].str.contains('Retired', case=False, na=False))
+    ]
+    logging.info(f"Retired players found: {len(retired_players)}")
+    return retired_players
 
 
 # ✅ Get Player Information
@@ -111,7 +114,7 @@ def get_player_info(player_name):
 
     info = player_data.iloc[0]
 
-    # Detect 2024/25 Earnings Column (with line break)
+    # Detect 2024/25 Earnings Column
     earnings_2024_25_column = [col for col in df.columns if "2024/25" in col and "sTLOS" in col]
     earnings_2024_25 = info.get(earnings_2024_25_column[0], 'N/A') if earnings_2024_25_column else 'N/A'
 
@@ -121,7 +124,7 @@ def get_player_info(player_name):
         f"⚽ Position: {info['Position']}\n"
         f"🏟️ Club: {info['Club']}\n"
         f"🌍 Country: {info['Country']}\n"
-        f"💰 Total Earnings: {info['Total Earnings']}\n"
+        f"💰 Total Earnings: {info['Total Earnings']} sTLOS\n"
         f"💼 2024/25 Earnings: {earnings_2024_25} sTLOS"
     )
 
