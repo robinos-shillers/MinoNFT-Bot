@@ -3,6 +3,7 @@ from telegram.ext import Application, CommandHandler, CallbackQueryHandler, Cont
 import logging
 from google_sheets import get_player_info, get_all_players, get_unique_values, get_players_by_filter, get_retired_players
 import os
+import re
 
 # ✅ Enable Logging
 logging.basicConfig(level=logging.INFO)
@@ -41,16 +42,22 @@ async def handle_sort_or_filter_selection(update: Update, context: ContextTypes.
             if df.empty:
                 await query.edit_message_text("❌ Error retrieving players.")
                 return
-                
-            players = df['Player'].dropna().apply(lambda x: str(x).strip()).sort_values().tolist()
+
+            # ✅ Clean player names (remove hidden characters, leading/trailing spaces)
+            players = df['Player'].dropna().apply(lambda x: re.sub(r'[\u200b\xa0\s]+', '', str(x).strip())).tolist()
+
+            # ✅ Filter out completely empty or invalid names
             players = [p for p in players if p]  # Remove empty strings
-            
+
+            # ✅ Sort Alphabetically
+            players = sorted(players)
+
             if not players:
                 await query.edit_message_text("❌ No players found.")
                 return
-                
-            logging.info(f"Found {len(players)} players")
-                
+
+            logging.info(f"Found {len(players)} players for alphabetical sort.")
+
             context.user_data['players_list'] = players
             context.user_data['current_page'] = 0
             await send_player_list(update, context, players, page=0)
@@ -95,22 +102,22 @@ async def handle_filter_value_selection(update: Update, context: ContextTypes.DE
         action = query.data
         if '_value_' in action:
             filter_type, filter_value = action.split('_value_')
-            
+
             field_map = {
                 'filter_club': 'Club',
                 'filter_rarity': 'Rarity',
                 'filter_country': 'Country'
             }
             field = field_map.get(filter_type)
-            
+
             logging.info(f"Filtering by {field}: {filter_value}")
-            
+
             players = get_players_by_filter(field, filter_value)
-            
+
             if not players:
                 await query.edit_message_text(f"❌ No players found for {filter_value}.")
                 return
-                
+
             logging.info(f"Players found for {filter_value}: {players}")
             context.user_data['players_list'] = players
             context.user_data['current_page'] = 0
@@ -172,6 +179,24 @@ async def handle_player_selection(update: Update, context: ContextTypes.DEFAULT_
         await query.edit_message_text("❌ An error occurred while loading player details.")
 
 
+# ✅ Pagination Handlers
+async def handle_pagination(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+
+    action = query.data
+    logging.info(f"Pagination action: {action}")
+
+    if 'prev_page_' in action or 'next_page_' in action:
+        page = int(action.split('_')[-1])
+        players = context.user_data.get('players_list', [])
+
+        if players:
+            await send_player_list(update, context, players, page)
+        else:
+            await query.edit_message_text("❌ No players found.")
+
+
 # ✅ Initialize Bot
 def create_bot():
     application = Application.builder().token(TOKEN).build()
@@ -183,5 +208,6 @@ def create_bot():
     application.add_handler(CallbackQueryHandler(handle_filter_value_selection, pattern='^filter_.*_value_.*$'))
     application.add_handler(CallbackQueryHandler(handle_sort_or_filter_selection, pattern='^(sort_|filter_(?!.*_value_).*)$'))
     application.add_handler(CallbackQueryHandler(handle_player_selection, pattern='^player_.*$'))
+    application.add_handler(CallbackQueryHandler(handle_pagination, pattern='^(prev_page_|next_page_).*'))
 
     return application
