@@ -44,14 +44,12 @@ async def handle_sort_or_filter_selection(update: Update, context: ContextTypes.
                 await query.edit_message_text("❌ Error retrieving players.")
                 return
 
-            # ✅ Clean player names (remove hidden characters)
-            players = df['Player'].dropna().apply(lambda x: re.sub(r'[\u200b\xa0\s]+', '', str(x).strip())).tolist()
+            # ✅ Clean player names (remove hidden characters and maintain proper spacing)
+            players = df['Player'].dropna().apply(lambda x: re.sub(r'[\u200b\xa0]+', ' ', str(x)).strip()).tolist()
 
-            # ✅ Filter out empty strings
+            # ✅ Filter out empty strings and sort case-insensitively
             players = [p for p in players if p]
-
-            # ✅ Sort Alphabetically
-            players = sorted(players)
+            players = sorted(players, key=str.lower)
 
             # ✅ Debugging Logs
             logging.info(f"Total players retrieved: {len(players)}")
