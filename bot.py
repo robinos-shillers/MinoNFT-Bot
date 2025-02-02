@@ -41,30 +41,25 @@ async def handle_sort_or_filter_selection(update: Update, context: ContextTypes.
             try:
                 df = get_all_players()
                 if df.empty:
-                    logging.warning("No player data retrieved from Google Sheets.")
-                    await query.edit_message_text("❌ Error retrieving players.")
+                    await query.edit_message_text("❌ No players found in database.")
                     return
 
-                # ✅ Clean and prepare player names
+                # Get players and sort them
                 players = df['Player'].dropna().tolist()
                 players = [str(p).strip() for p in players if str(p).strip()]
-                players = sorted(players, key=str.lower)
+                players = sorted(players, key=lambda x: x.lower())
 
                 if not players:
-                    logging.warning("Player list is empty after cleaning and sorting.")
                     await query.edit_message_text("❌ No players found.")
                     return
 
-                # ✅ Debugging Logs
-                logging.info(f"Total players retrieved: {len(players)}")
-                logging.info(f"First 10 players: {players[:10]}")
-
+                # Store players and display first page
                 context.user_data['players_list'] = players
                 context.user_data['current_page'] = 0
                 await send_player_list(update, context, players, page=0)
 
             except Exception as e:
-                logging.error(f"Error processing players: {e}")
+                logging.error(f"Error in sort_alpha: {e}")
                 await query.edit_message_text("❌ Error retrieving players.")
                 return
 
