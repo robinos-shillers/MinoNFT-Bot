@@ -53,13 +53,13 @@ async def handle_sort_or_filter_selection(update: Update, context: ContextTypes.
                     await query.edit_message_text("❌ No players found.")
                     return
 
-                # Store players and display first page
+                logging.info(f"Sorted players: {players}")  # Add debug logging
                 context.user_data['players_list'] = players
                 context.user_data['current_page'] = 0
                 await send_player_list(update, context, players, page=0)
 
             except Exception as e:
-                logging.error(f"Error in sort_alpha: {e}")
+                logging.error(f"Error in sort_alpha: {str(e)}")  # Log full error
                 await query.edit_message_text("❌ Error retrieving players.")
                 return
 
