@@ -28,17 +28,24 @@ def clean_data(df):
 def get_all_players():
     """Get all active players from the spreadsheet."""
     try:
-        data = player_list_sheet.get_all_records()
-        df = pd.DataFrame(data)
-        df = clean_data(df)
-        logging.info(f"Retrieved {len(df)} players from spreadsheet")
-        return df
+        df = pd.DataFrame(player_list_sheet.get_all_records())
+        logging.info(f"Total players loaded: {len(df)}")
+        
+        df = clean_data(df)  # Clean data
+        
+        # Filter out retired players
+        active_players = df[
+            (~df['Club'].str.contains('Retired', case=False, na=False)) &
+            (~df['Country'].str.contains('Retired', case=False, na=False)) &
+            (df['Player'].notnull()) &
+            (df['Player'].str.strip() != '')
+        ]
+        
+        logging.info(f"Active players after filtering: {len(active_players)}")
+        return active_players
     except Exception as e:
         logging.error(f"Error getting players: {e}")
-        return pd.DataFrame()g Retired)
-def get_all_players():
-    """Retrieve all active players (excluding retired)."""
-    df = pd.DataFrame(player_list_sheet.get_all_records())
+        return pd.DataFrame()
     logging.info(f"Total players loaded: {len(df)}")
 
     df = clean_data(df)  # ✅ Clean data
