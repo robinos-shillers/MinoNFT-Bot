@@ -40,23 +40,27 @@ async def handle_sort_or_filter_selection(update: Update, context: ContextTypes.
         if action == 'sort_alpha':
             df = get_all_players()
             if df.empty:
+                logging.warning("No player data retrieved from Google Sheets.")
                 await query.edit_message_text("❌ Error retrieving players.")
                 return
 
-            # ✅ Clean player names (remove hidden characters, leading/trailing spaces)
+            # ✅ Clean player names (remove hidden characters)
             players = df['Player'].dropna().apply(lambda x: re.sub(r'[\u200b\xa0\s]+', '', str(x).strip())).tolist()
 
-            # ✅ Filter out completely empty or invalid names
-            players = [p for p in players if p]  # Remove empty strings
+            # ✅ Filter out empty strings
+            players = [p for p in players if p]
 
             # ✅ Sort Alphabetically
             players = sorted(players)
 
+            # ✅ Debugging Logs
+            logging.info(f"Total players retrieved: {len(players)}")
+            logging.info(f"First 10 players: {players[:10]}")
+
             if not players:
+                logging.warning("Player list is empty after cleaning and sorting.")
                 await query.edit_message_text("❌ No players found.")
                 return
-
-            logging.info(f"Found {len(players)} players for alphabetical sort.")
 
             context.user_data['players_list'] = players
             context.user_data['current_page'] = 0
@@ -133,6 +137,10 @@ async def send_player_list(update, context, players, page):
     start = page * ITEMS_PER_PAGE
     end = start + ITEMS_PER_PAGE
     current_players = players[start:end]
+
+    # ✅ Debugging Logs
+    logging.info(f"Displaying players from {start} to {end}")
+    logging.info(f"Players on this page: {current_players}")
 
     keyboard = [[InlineKeyboardButton(player, callback_data=f'player_{player}')] for player in current_players]
 
