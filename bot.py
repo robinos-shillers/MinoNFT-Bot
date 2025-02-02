@@ -51,25 +51,22 @@ async def handle_sort_or_filter_selection(update: Update, context: ContextTypes.
                 players = sorted(players, key=str.lower)
 
                 if not players:
-                    await query.edit_message_text("❌ No players found in database.")
+                    logging.warning("Player list is empty after cleaning and sorting.")
+                    await query.edit_message_text("❌ No players found.")
                     return
 
                 # ✅ Debugging Logs
                 logging.info(f"Total players retrieved: {len(players)}")
                 logging.info(f"First 10 players: {players[:10]}")
 
-                if not players:
-                    logging.warning("Player list is empty after cleaning and sorting.")
-                    await query.edit_message_text("❌ No players found.")
-                    return
+                context.user_data['players_list'] = players
+                context.user_data['current_page'] = 0
+                await send_player_list(update, context, players, page=0)
+
             except Exception as e:
                 logging.error(f"Error processing players: {e}")
                 await query.edit_message_text("❌ Error retrieving players.")
                 return
-
-            context.user_data['players_list'] = players
-            context.user_data['current_page'] = 0
-            await send_player_list(update, context, players, page=0)
 
         elif action in ['filter_club', 'filter_rarity', 'filter_country']:
             field_map = {
