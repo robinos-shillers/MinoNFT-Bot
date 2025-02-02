@@ -16,17 +16,21 @@ spreadsheet = client.open("Mino Football Earnings - 2024/25")
 player_list_sheet = spreadsheet.worksheet("Player List")
 
 
+# ✅ Data Cleaning (Internal Only)
+def clean_data(df):
+    """Trim whitespace and remove hidden characters without changing case."""
+    for col in ['Player', 'Club', 'Country', 'Rarity']:
+        df[col] = df[col].astype(str).str.strip().str.replace('\u200b', '')  # Remove hidden zero-width spaces
+    return df
+
+
 # ✅ Get Active Players (Excluding Retired)
 def get_all_players():
     """Retrieve all active players (excluding retired)."""
     df = pd.DataFrame(player_list_sheet.get_all_records())
     logging.info(f"Total players loaded: {len(df)}")
 
-    # Clean whitespace and standardize casing for filtering
-    df['Player'] = df['Player'].astype(str).str.strip()
-    df['Club'] = df['Club'].astype(str).str.strip()
-    df['Country'] = df['Country'].astype(str).str.strip()
-    df['Rarity'] = df['Rarity'].astype(str).str.strip()
+    df = clean_data(df)  # ✅ Clean data
 
     # Filter out retired players
     active_players = df[
@@ -39,6 +43,29 @@ def get_all_players():
     logging.info(f"Active players after filtering: {len(active_players)}")
     logging.info(f"Sample active players: {active_players['Player'].head().tolist()}")
     return active_players
+
+
+# ✅ Get Players by Filter
+def get_players_by_filter(field, value):
+    """Retrieve players based on Club, Country, or Rarity filter."""
+    logging.info(f"Executing get_players_by_filter for {field} = '{value}'")
+
+    df = get_all_players()
+
+    # ✅ Case-insensitive comparison without changing data display
+    mask = df[field].str.strip().str.lower() == value.strip().lower()
+
+    logging.info(f"Available values for {field}: {df[field].unique()}")
+
+    filtered_df = df[mask]
+
+    if filtered_df.empty:
+        logging.warning(f"No players found for {value} in {field}")
+
+    players = filtered_df["Player"].dropna().tolist()
+
+    logging.info(f"Players found for {value}: {players}")
+    return players
 
 
 # ✅ Get Unique Filter Values
@@ -62,33 +89,12 @@ def get_unique_values(field):
     return []
 
 
-# ✅ Get Players by Filter
-def get_players_by_filter(field, value):
-    """Retrieve players based on Club, Country, or Rarity filter."""
-    df = get_all_players()
-
-    # Standardize case and whitespace
-    df[field] = df[field].astype(str).str.strip().str.lower()
-    value = value.strip().lower()
-
-    logging.info(f"Filtering players where {field} = '{value}'")
-    logging.info(f"Available values for {field}: {df[field].unique()}")
-
-    if field in df.columns:
-        filtered_df = df[df[field] == value]
-        players = filtered_df["Player"].dropna().tolist()
-
-        logging.info(f"Players found for {value}: {players}")
-        return players
-    else:
-        logging.warning(f"Field '{field}' not found in data.")
-    return []
-
-
 # ✅ Get Retired Players
 def get_retired_players():
     """Retrieve retired players."""
     df = pd.DataFrame(player_list_sheet.get_all_records())
+    df = clean_data(df)  # ✅ Clean data
+
     retired_players = df[
         (df['Club'].str.contains('Retired', case=False, na=False)) |
         (df['Country'].str.contains('Retired', case=False, na=False))
@@ -101,12 +107,9 @@ def get_retired_players():
 def get_player_info(player_name):
     """Retrieve player details and NFT video link."""
     df = pd.DataFrame(player_list_sheet.get_all_records())
+    df = clean_data(df)  # ✅ Clean data
 
-    # Standardize player name
-    df['Player'] = df['Player'].astype(str).str.strip().str.lower()
-    player_name = player_name.strip().lower()
-
-    player_data = df[df["Player"] == player_name]
+    player_data = df[df["Player"].str.strip().str.lower() == player_name.strip().lower()]
 
     if player_data.empty:
         logging.warning(f"No data found for player: {player_name}")
@@ -119,7 +122,7 @@ def get_player_info(player_name):
     earnings_2024_25 = info.get(earnings_2024_25_column[0], 'N/A') if earnings_2024_25_column else 'N/A'
 
     info_text = (
-        f"🔹 *{info['Player'].title()}* 🔹\n"
+        f"🔹 *{info['Player']}* 🔹\n"
         f"🎭 Rarity: {info['Rarity']}\n"
         f"⚽ Position: {info['Position']}\n"
         f"🏟️ Club: {info['Club']}\n"
