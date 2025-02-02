@@ -80,9 +80,17 @@ async def handle_filter_value_selection(update: Update, context: ContextTypes.DE
     logging.info(f"Received filter selection callback data: {query.data}")  # Log the callback data
 
     try:
+        # ✅ Debug Step 1: Ensure correct splitting of callback data
         data = query.data.split('_value_')
+        logging.info(f"Split data: {data}")
+
+        if len(data) != 2:
+            logging.warning("Invalid callback data format.")
+            return
+
         filter_type, filter_value = data[0], data[1]
 
+        # ✅ Debug Step 2: Confirm field mapping
         field_map = {
             'filter_club': 'Club',
             'filter_rarity': 'Rarity',
@@ -92,9 +100,18 @@ async def handle_filter_value_selection(update: Update, context: ContextTypes.DE
 
         logging.info(f"Filtering by {field}: {filter_value}")
 
+        if not field:
+            logging.warning(f"Invalid filter type: {filter_type}")
+            return
+
+        # ✅ Debug Step 3: Attempt to retrieve players
         players = get_players_by_filter(field, filter_value)
 
         logging.info(f"Players found for {filter_value}: {players}")
+
+        if not players:
+            await query.edit_message_text(f"❌ No players found for {filter_value}.")
+            return
 
         context.user_data['players_list'] = players
         context.user_data['current_page'] = 0
@@ -163,9 +180,8 @@ def create_bot():
 
     # Commands
     application.add_handler(CommandHandler("players", players_command))
-    application.add_handler(CommandHandler("player", handle_player_selection))  # Added to fix /player issue
 
-    # Callback Handlers (Fixed Regex Patterns)
+    # Callback Handlers
     application.add_handler(CallbackQueryHandler(handle_sort_or_filter_selection, pattern='^(sort_|filter_.*)$'))
     application.add_handler(CallbackQueryHandler(handle_filter_value_selection, pattern='^(filter_.*_value_.*)$'))
     application.add_handler(CallbackQueryHandler(handle_player_selection, pattern='^player_.*$'))
