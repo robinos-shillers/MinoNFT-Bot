@@ -28,23 +28,30 @@ def clean_data(df):
 def get_all_players():
     """Get all active players from the spreadsheet."""
     try:
-        df = pd.DataFrame(player_list_sheet.get_all_records())
-        logging.info(f"Total players loaded: {len(df)}")
+        # Refresh credentials if needed
+        if not player_list_sheet.client.auth.valid:
+            player_list_sheet.client.login()
         
+        records = player_list_sheet.get_all_records()
+        df = pd.DataFrame(records)
+        
+        if df.empty:
+            logging.error("Retrieved empty dataframe from sheets")
+            return pd.DataFrame()
+            
         df = clean_data(df)  # Clean data
         
         # Get all players (including retired)
         all_players = df[
             (df['Player'].notnull()) &
             (df['Player'].str.strip() != '')
-        ]
+        ].copy()
         
         logging.info(f"All players after filtering: {len(all_players)}")
-        logging.info(f"Sample players: {all_players['Player'].head().tolist()}")
         return all_players
         
     except Exception as e:
-        logging.error(f"Error getting players: {e}")
+        logging.error(f"Error getting players: {str(e)}")
         return pd.DataFrame()
 
 

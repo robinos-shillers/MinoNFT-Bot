@@ -38,22 +38,25 @@ async def handle_sort_or_filter_selection(update: Update, context: ContextTypes.
 
     try:
         if action == 'sort_alpha':
-            df = get_all_players()
-            if df.empty:
-                logging.warning("No player data retrieved from Google Sheets.")
-                await query.edit_message_text("❌ Error retrieving players.")
-                return
+            try:
+                df = get_all_players()
+                if df.empty:
+                    logging.warning("No player data retrieved from Google Sheets.")
+                    await query.edit_message_text("❌ Error retrieving players.")
+                    return
 
-            # ✅ Clean player names (remove hidden characters and maintain proper spacing)
-            players = df['Player'].dropna().apply(lambda x: re.sub(r'[\u200b\xa0]+', ' ', str(x)).strip()).tolist()
+                # ✅ Clean and prepare player names
+                players = df['Player'].dropna().tolist()
+                players = [str(p).strip() for p in players if str(p).strip()]
+                players = sorted(players, key=str.lower)
 
-            # ✅ Filter out empty strings and sort case-insensitively
-            players = [p for p in players if p]
-            players = sorted(players, key=str.lower)
+                if not players:
+                    await query.edit_message_text("❌ No players found in database.")
+                    return
 
-            # ✅ Debugging Logs
-            logging.info(f"Total players retrieved: {len(players)}")
-            logging.info(f"First 10 players: {players[:10]}")
+                # ✅ Debugging Logs
+                logging.info(f"Total players retrieved: {len(players)}")
+                logging.info(f"First 10 players: {players[:10]}")
 
             if not players:
                 logging.warning("Player list is empty after cleaning and sorting.")
