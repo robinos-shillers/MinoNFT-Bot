@@ -58,9 +58,13 @@ async def handle_sort_or_filter_selection(update: Update, context: ContextTypes.
                 logging.info(f"Total players retrieved: {len(players)}")
                 logging.info(f"First 10 players: {players[:10]}")
 
-            if not players:
-                logging.warning("Player list is empty after cleaning and sorting.")
-                await query.edit_message_text("❌ No players found.")
+                if not players:
+                    logging.warning("Player list is empty after cleaning and sorting.")
+                    await query.edit_message_text("❌ No players found.")
+                    return
+            except Exception as e:
+                logging.error(f"Error processing players: {e}")
+                await query.edit_message_text("❌ Error retrieving players.")
                 return
 
             context.user_data['players_list'] = players
