@@ -96,23 +96,13 @@ async def handle_filter_value_selection(update: Update, context: ContextTypes.DE
             players = get_players_by_filter(field, filter_value)
             
             if not players:
-                await query.edit_message_text(f"No players found for {filter_value}")
+                await query.edit_message_text(f"❌ No players found for {filter_value}.")
                 return
                 
+            logging.info(f"Players found for {filter_value}: {players}")
             context.user_data['players_list'] = players
             context.user_data['current_page'] = 0
             await send_player_list(update, context, players, page=0)
-
-        logging.info(f"Players found for {filter_value}: {players}")
-
-        if not players:
-            await query.edit_message_text(f"❌ No players found for {filter_value}.")
-            return
-
-        context.user_data['players_list'] = players
-        context.user_data['current_page'] = 0
-
-        await send_player_list(update, context, players, page=0)
 
     except Exception as e:
         logging.error(f"Error in handle_filter_value_selection: {e}")
