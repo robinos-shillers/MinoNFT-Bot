@@ -178,8 +178,8 @@ def create_bot():
     application.add_handler(CommandHandler("players", players_command))
 
     # Callback Handlers
-    application.add_handler(CallbackQueryHandler(handle_sort_or_filter_selection, pattern='^(sort_|filter_.*)$'))
-    application.add_handler(CallbackQueryHandler(handle_filter_value_selection, pattern='^(filter_.*_value_.*)$'))
+    application.add_handler(CallbackQueryHandler(handle_filter_value_selection, pattern='^filter_.*_value_.*$'))
+    application.add_handler(CallbackQueryHandler(handle_sort_or_filter_selection, pattern='^(sort_|filter_(?!.*_value_).*)$'))
     application.add_handler(CallbackQueryHandler(handle_player_selection, pattern='^player_.*$'))
 
     return application
