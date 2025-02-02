@@ -60,19 +60,18 @@ def get_players_by_filter(field, value):
     df[field] = df[field].astype(str).str.strip()
     value = str(value).strip()
     
+    # Ensure data types and clean values
+    df[field] = df[field].fillna('').astype(str).str.strip()
+    value = str(value).strip()
+    
     # Case-insensitive match
     mask = df[field].str.lower() == value.lower()
     filtered_df = df[mask]
     
-    # Log filtering results
-    logging.info(f"Matches found: {len(filtered_df)}")
-    
+    # Get players and log results
     players = filtered_df["Player"].dropna().tolist()
-    logging.info(f"Players found for {value}: {players}")
+    logging.info(f"Found {len(players)} players for {field}={value}: {players}")
     
-    if not players:
-        logging.warning(f"No players found for {value} in {field}")
-        
     return players
 
 
