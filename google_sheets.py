@@ -33,34 +33,19 @@ def get_all_players():
         
         df = clean_data(df)  # Clean data
         
-        # Filter out retired players
-        active_players = df[
-            (~df['Club'].str.contains('Retired', case=False, na=False)) &
-            (~df['Country'].str.contains('Retired', case=False, na=False)) &
+        # Get all players (including retired)
+        all_players = df[
             (df['Player'].notnull()) &
             (df['Player'].str.strip() != '')
         ]
         
-        logging.info(f"Active players after filtering: {len(active_players)}")
-        return active_players
+        logging.info(f"All players after filtering: {len(all_players)}")
+        logging.info(f"Sample players: {all_players['Player'].head().tolist()}")
+        return all_players
+        
     except Exception as e:
         logging.error(f"Error getting players: {e}")
         return pd.DataFrame()
-    logging.info(f"Total players loaded: {len(df)}")
-
-    df = clean_data(df)  # ✅ Clean data
-
-    # Filter out retired players
-    active_players = df[
-        (~df['Club'].str.contains('Retired', case=False, na=False)) &
-        (~df['Country'].str.contains('Retired', case=False, na=False)) &
-        (df['Player'].notnull()) &
-        (df['Player'].str.strip() != '')
-    ]
-
-    logging.info(f"Active players after filtering: {len(active_players)}")
-    logging.info(f"Sample active players: {active_players['Player'].head().tolist()}")
-    return active_players
 
 
 # ✅ Get Players by Filter
