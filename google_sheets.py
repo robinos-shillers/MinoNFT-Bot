@@ -52,25 +52,27 @@ def get_players_by_filter(field, value):
 
     df = get_all_players()
     
-    # Normalize both the field values and the target value
-    df[field] = df[field].str.strip()
-    value = value.strip()
+    # Add more detailed logging
+    logging.info(f"Total rows in dataframe: {len(df)}")
+    logging.info(f"Sample of {field} values: {df[field].head().tolist()}")
     
-    # Exact match (case-sensitive)
-    mask = df[field] == value
+    # Clean and normalize the data
+    df[field] = df[field].astype(str).str.strip()
+    value = str(value).strip()
     
-    logging.info(f"Available values for {field}: {df[field].unique().tolist()}")
+    # Case-insensitive match
+    mask = df[field].str.lower() == value.lower()
     filtered_df = df[mask]
     
-    if filtered_df.empty:
-        logging.warning(f"No players found for {value} in {field}")
-        # Try case-insensitive match as fallback
-        mask = df[field].str.lower() == value.lower()
-        filtered_df = df[mask]
-
-    players = filtered_df["Player"].dropna().tolist()
+    # Log filtering results
+    logging.info(f"Matches found: {len(filtered_df)}")
     
+    players = filtered_df["Player"].dropna().tolist()
     logging.info(f"Players found for {value}: {players}")
+    
+    if not players:
+        logging.warning(f"No players found for {value} in {field}")
+        
     return players
 
 
