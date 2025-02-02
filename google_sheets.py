@@ -51,19 +51,25 @@ def get_players_by_filter(field, value):
     logging.info(f"Executing get_players_by_filter for {field} = '{value}'")
 
     df = get_all_players()
-
-    # ✅ Case-insensitive comparison without changing data display
-    mask = df[field].str.strip().str.lower() == value.strip().lower()
-
-    logging.info(f"Available values for {field}: {df[field].unique()}")
-
+    
+    # Normalize both the field values and the target value
+    df[field] = df[field].str.strip()
+    value = value.strip()
+    
+    # Exact match (case-sensitive)
+    mask = df[field] == value
+    
+    logging.info(f"Available values for {field}: {df[field].unique().tolist()}")
     filtered_df = df[mask]
-
+    
     if filtered_df.empty:
         logging.warning(f"No players found for {value} in {field}")
+        # Try case-insensitive match as fallback
+        mask = df[field].str.lower() == value.lower()
+        filtered_df = df[mask]
 
     players = filtered_df["Player"].dropna().tolist()
-
+    
     logging.info(f"Players found for {value}: {players}")
     return players
 
