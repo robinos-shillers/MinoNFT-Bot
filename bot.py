@@ -45,9 +45,11 @@ async def handle_sort_or_filter_selection(update: Update, context: ContextTypes.
                     return
 
                 # Get players and sort them (filter out retired players)
-                players = df[~df['Club'].str.contains('Retired', case=False, na=False)]['Player'].dropna().tolist()
+                mask = ~(df['Club'].str.contains('Retired', case=False, na=False) | 
+                        df['Country'].str.contains('Retired', case=False, na=False))
+                players = df[mask]['Player'].dropna().tolist()
                 players = [str(p).strip() for p in players if str(p).strip()]
-                players = sorted(players, key=str.lower)
+                players = sorted(players, key=lambda x: str(x).lower())
                 
                 logging.info(f"Total players found: {len(players)}")
                 logging.info(f"First few players: {players[:5]}")
