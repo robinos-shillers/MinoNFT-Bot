@@ -1,7 +1,7 @@
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
 import logging
-from google_sheets import get_player_info, get_all_players, get_unique_values, get_players_by_filter
+from google_sheets import get_player_info, get_all_players, get_unique_values, get_players_by_filter, get_retired_players
 import os
 
 # ✅ Enable Logging
@@ -57,7 +57,10 @@ async def handle_sort_or_filter_selection(update: Update, context: ContextTypes.
             await query.edit_message_text(f"Select a {field}:", reply_markup=reply_markup)
 
         elif action == 'filter_retired':
-            players = get_retired_players()["Player"].dropna().tolist()
+            retired_df = get_retired_players()
+            players = retired_df["Player"].dropna().tolist()
+            logging.info(f"Retired players found: {players}")
+
             context.user_data['players_list'] = players
             context.user_data['current_page'] = 0
             await send_player_list(update, context, players, page=0)
