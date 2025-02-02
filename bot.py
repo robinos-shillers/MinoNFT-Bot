@@ -47,12 +47,17 @@ async def handle_sort_or_filter_selection(update: Update, context: ContextTypes.
                 # Get players and sort them (filter out retired players)
                 mask = ~(df['Club'].str.contains('Retired', case=False, na=False) | 
                         df['Country'].str.contains('Retired', case=False, na=False))
-                players = df[mask]['Player'].dropna().tolist()
-                players = [str(p).strip() for p in players if str(p).strip()]
-                players = sorted(players, key=lambda x: str(x).lower())
+                players = df[mask]['Player'].dropna()
+                players = players.str.strip()
+                players = players[players != '']
                 
-                logging.info(f"Total players found: {len(players)}")
-                logging.info(f"First few players: {players[:5]}")
+                # Convert to list and sort
+                players_list = players.tolist()
+                players_list.sort(key=str.lower)
+                
+                logging.info(f"Total players found: {len(players_list)}")
+                logging.info(f"First few players before sort: {players[:5].tolist()}")
+                logging.info(f"First few players after sort: {players_list[:5]}")
 
                 if not players:
                     await query.edit_message_text("❌ No players found.")
