@@ -24,7 +24,18 @@ def clean_data(df):
     return df
 
 
-# ✅ Get Active Players (Excluding Retired)
+# ✅ Get Active Players
+def get_all_players():
+    """Get all active players from the spreadsheet."""
+    try:
+        data = player_list_sheet.get_all_records()
+        df = pd.DataFrame(data)
+        df = clean_data(df)
+        logging.info(f"Retrieved {len(df)} players from spreadsheet")
+        return df
+    except Exception as e:
+        logging.error(f"Error getting players: {e}")
+        return pd.DataFrame()g Retired)
 def get_all_players():
     """Retrieve all active players (excluding retired)."""
     df = pd.DataFrame(player_list_sheet.get_all_records())

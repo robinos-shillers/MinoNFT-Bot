@@ -38,15 +38,18 @@ async def handle_sort_or_filter_selection(update: Update, context: ContextTypes.
     try:
         if action == 'sort_alpha':
             df = get_all_players()
-            logging.info(f"Total rows in dataframe: {len(df)}")
-            logging.info(f"Columns in dataframe: {df.columns.tolist()}")
-            players = df[df['Player'].notnull() & (df['Player'].str.strip() != '')]['Player'].str.strip().sort_values().tolist()
-            logging.info(f"Alphabetically sorted players: {len(players)} found")
-            logging.info(f"First few players: {players[:5] if players else 'No players found'}")
+            if df.empty:
+                await query.edit_message_text("❌ Error retrieving players.")
+                return
+                
+            players = df['Player'].dropna().apply(lambda x: str(x).strip()).sort_values().tolist()
+            players = [p for p in players if p]  # Remove empty strings
             
             if not players:
                 await query.edit_message_text("❌ No players found.")
                 return
+                
+            logging.info(f"Found {len(players)} players")
                 
             context.user_data['players_list'] = players
             context.user_data['current_page'] = 0
