@@ -33,6 +33,8 @@ async def handle_sort_or_filter_selection(update: Update, context: ContextTypes.
     await query.answer()
     action = query.data
 
+    logging.info(f"Received action: {action}")  # Log the callback data
+
     try:
         if action == 'sort_alpha':
             df = get_all_players()
@@ -74,6 +76,8 @@ async def handle_sort_or_filter_selection(update: Update, context: ContextTypes.
 async def handle_filter_value_selection(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
+
+    logging.info(f"Received filter selection callback data: {query.data}")  # Log the callback data
 
     try:
         data = query.data.split('_value_')
@@ -133,6 +137,8 @@ async def handle_player_selection(update: Update, context: ContextTypes.DEFAULT_
     query = update.callback_query
     await query.answer()
 
+    logging.info(f"Player selection callback data: {query.data}")  # Log player selection
+
     try:
         player_name = query.data.split('_', 1)[1]
         player_info = get_player_info(player_name)
@@ -157,10 +163,11 @@ def create_bot():
 
     # Commands
     application.add_handler(CommandHandler("players", players_command))
+    application.add_handler(CommandHandler("player", handle_player_selection))  # Added to fix /player issue
 
-    # Callback Handlers
-    application.add_handler(CallbackQueryHandler(handle_sort_or_filter_selection, pattern='^(sort_|filter_)'))
-    application.add_handler(CallbackQueryHandler(handle_filter_value_selection, pattern='^(filter_.*_value_)'))
-    application.add_handler(CallbackQueryHandler(handle_player_selection, pattern='^player_'))
+    # Callback Handlers (Fixed Regex Patterns)
+    application.add_handler(CallbackQueryHandler(handle_sort_or_filter_selection, pattern='^(sort_|filter_.*)$'))
+    application.add_handler(CallbackQueryHandler(handle_filter_value_selection, pattern='^(filter_.*_value_.*)$'))
+    application.add_handler(CallbackQueryHandler(handle_player_selection, pattern='^player_.*$'))
 
     return application
