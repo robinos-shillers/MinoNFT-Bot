@@ -166,6 +166,9 @@ async def send_filter_options(update, context, options, page, field):
 
     if pagination_buttons:
         keyboard.append(pagination_buttons)
+        
+    # Add back button
+    keyboard.append([InlineKeyboardButton("🔙 Back to Menu", callback_data='back_to_menu')])
 
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.callback_query.edit_message_text(f"Select a {field}:", reply_markup=reply_markup)
@@ -272,8 +275,24 @@ def create_bot():
     application.add_handler(CallbackQueryHandler(handle_player_selection, pattern='^player_.*$'))
     application.add_handler(CallbackQueryHandler(handle_pagination, pattern='^(prev|next)_page_\d+$'))
     application.add_handler(CallbackQueryHandler(handle_filter_pagination, pattern='^filter_(prev|next)_\d+$'))
+    application.add_handler(CallbackQueryHandler(handle_back_to_menu, pattern='^back_to_menu$'))
 
     return application
+
+
+async def handle_back_to_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    
+    keyboard = [
+        [InlineKeyboardButton("📋 Show All", callback_data='filter_all')],
+        [InlineKeyboardButton("🏟️ By Club", callback_data='filter_club')],
+        [InlineKeyboardButton("⭐ By Rarity", callback_data='filter_rarity')],
+        [InlineKeyboardButton("🌍 By Country", callback_data='filter_country')],
+        [InlineKeyboardButton("👴 Retired Players", callback_data='filter_retired')]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await query.edit_message_text("How would you like to view the players?", reply_markup=reply_markup)
 
 
 async def handle_filter_pagination(update: Update, context: ContextTypes.DEFAULT_TYPE):
