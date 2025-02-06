@@ -161,7 +161,7 @@ def get_top_earners(page=0, items_per_page=10):
 
 def get_current_season_earners(page=0, items_per_page=10):
     """Retrieve top earners for current season based on Total minus Ballon d'Or."""
-    earnings_sheet = client.open("Mino Football Earnings - 2024/25").worksheet("Earnings Distribution")
+    earnings_sheet = client.open("Mino Football Earnings - 2024/25").worksheet("Earning Distribution")
     df = pd.DataFrame(earnings_sheet.get_all_records())
     df = clean_data(df)
     
