@@ -9,7 +9,8 @@ from google_sheets import (
     get_retired_players,
     get_players_alphabetically,
     get_top_earners,
-    get_current_season_earners
+    get_current_season_earners,
+    get_player_earnings_chart
 )
 import os
 
