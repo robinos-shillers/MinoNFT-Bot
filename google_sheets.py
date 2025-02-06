@@ -139,6 +139,41 @@ def get_retired_players():
 
 
 # ✅ Get Player Information
+def get_top_earners(page=0, items_per_page=10):
+    """Retrieve top earners of all time sorted by Total Earnings."""
+    df = pd.DataFrame(player_list_sheet.get_all_records())
+    df = clean_data(df)
+    
+    # Convert Total Earnings to numeric, removing any currency symbols
+    df['Total Earnings'] = pd.to_numeric(df['Total Earnings'].str.replace(r'[^\d.]', '', regex=True), errors='coerce')
+    
+    # Sort by Total Earnings descending
+    df = df.sort_values('Total Earnings', ascending=False)
+    
+    # Calculate pagination
+    start = page * items_per_page
+    end = start + items_per_page
+    
+    return df.iloc[start:end][['Player', 'Total Earnings', 'Club', 'Country']].to_dict('records')
+
+def get_current_season_earners(page=0, items_per_page=10):
+    """Retrieve top earners for current season (2024/25)."""
+    df = pd.DataFrame(player_list_sheet.get_all_records())
+    df = clean_data(df)
+    
+    # Convert current season earnings to numeric
+    season_col = '2024/25 sTLOS'
+    df[season_col] = pd.to_numeric(df[season_col].str.replace(r'[^\d.]', '', regex=True), errors='coerce')
+    
+    # Sort by current season earnings descending
+    df = df.sort_values(season_col, ascending=False)
+    
+    # Calculate pagination
+    start = page * items_per_page
+    end = start + items_per_page
+    
+    return df.iloc[start:end][['Player', season_col, 'Club', 'Country']].to_dict('records')
+
 def get_player_info(player_name):
     """Retrieve player details and NFT video link."""
     df = pd.DataFrame(player_list_sheet.get_all_records())

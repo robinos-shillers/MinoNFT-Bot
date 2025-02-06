@@ -275,6 +275,55 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(welcome_message, parse_mode="Markdown")
 
 # ✅ Help Command
+async def earnings_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    keyboard = [
+        [InlineKeyboardButton("💰 All-Time Top Earners", callback_data='earnings_alltime_0')],
+        [InlineKeyboardButton("📈 2024/25 Top Earners", callback_data='earnings_current_0')]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await update.message.reply_text("View top earners:", reply_markup=reply_markup)
+
+async def handle_earnings_list(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    
+    action, type_, page = query.data.split('_')
+    page = int(page)
+    
+    if type_ == 'alltime':
+        earners = get_top_earners(page)
+        title = "💰 All-Time Top Earners"
+        next_callback = f'earnings_alltime_{page+1}'
+        prev_callback = f'earnings_alltime_{page-1}'
+    else:
+        earners = get_current_season_earners(page)
+        title = "📈 2024/25 Season Top Earners"
+        next_callback = f'earnings_current_{page+1}'
+        prev_callback = f'earnings_current_{page-1}'
+    
+    if not earners:
+        await query.edit_message_text("❌ No earnings data available.")
+        return
+    
+    message = f"*{title}*\n\n"
+    for i, player in enumerate(earners, 1):
+        earnings = player.get('Total Earnings' if type_ == 'alltime' else '2024/25 sTLOS', 0)
+        message += f"{i}. *{player['Player']}*\n"
+        message += f"   💵 {earnings} {'sTLOS' if type_ == 'current' else ''}\n"
+        message += f"   🏟️ {player['Club']}\n\n"
+    
+    keyboard = []
+    if page > 0:
+        keyboard.append(InlineKeyboardButton("⬅️ Previous", callback_data=prev_callback))
+    if len(earners) == 10:  # If we have full page, assume there might be more
+        keyboard.append(InlineKeyboardButton("➡️ Next", callback_data=next_callback))
+    
+    if keyboard:
+        reply_markup = InlineKeyboardMarkup([keyboard])
+        await query.edit_message_text(message, reply_markup=reply_markup, parse_mode="Markdown")
+    else:
+        await query.edit_message_text(message, parse_mode="Markdown")
+
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     help_message = (
         "*📚 Mino NFT Bot Commands*\n\n"
@@ -282,6 +331,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "🔍 */player <name>* - Search for a specific player\n"
         "Example: `/player Lionel Messi`\n\n"
         "📋 */players* - Browse players with these filters:\n"
+        "💰 */earnings* - View top earners (all-time and current season)\n\n"
         "• Show all players\n"
         "• Filter by club\n"
         "• Filter by rarity\n"
@@ -303,6 +353,7 @@ def create_bot():
     application.add_handler(CommandHandler("help", help_command))
     application.add_handler(CommandHandler("players", players_command))
     application.add_handler(CommandHandler("player", player_command))
+    application.add_handler(CommandHandler("earnings", earnings_command))
 
     # Callback Handlers
     application.add_handler(CallbackQueryHandler(handle_filter_value_selection, pattern='^filter_.*_value_.*$'))
@@ -311,6 +362,7 @@ def create_bot():
     application.add_handler(CallbackQueryHandler(handle_pagination, pattern='^(prev|next)_page_\d+$'))
     application.add_handler(CallbackQueryHandler(handle_filter_pagination, pattern='^filter_(prev|next)_\d+$'))
     application.add_handler(CallbackQueryHandler(handle_back_to_menu, pattern='^back_to_menu$'))
+    application.add_handler(CallbackQueryHandler(handle_earnings_list, pattern='^earnings_.*$'))
 
     return application
 
