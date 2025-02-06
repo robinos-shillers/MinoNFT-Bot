@@ -309,10 +309,8 @@ async def handle_earnings_list(update: Update, context: ContextTypes.DEFAULT_TYP
     
     message = f"*{title}*\n\n"
     for i, player in enumerate(earners, 1):
-        earnings = player.get('Total Earnings' if type_ == 'alltime' else '2024/25 sTLOS', 0)
-        message += f"{i}. *{player['Player']}*\n"
-        message += f"   💵 {earnings} {'sTLOS' if type_ == 'current' else ''}\n"
-        message += f"   🏟️ {player['Club']}\n\n"
+        earnings = player.get('Total Earnings' if type_ == 'alltime' else '2024/25\nsTLOS', 0)
+        message += f"{i}. *{player['Player']}* - {earnings} {'sTLOS' if type_ == 'current' else ''}\n"
     
     keyboard = []
     if page > 0:

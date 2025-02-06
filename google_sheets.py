@@ -165,8 +165,9 @@ def get_current_season_earners(page=0, items_per_page=10):
     season_col = '2024/25\nsTLOS'  # Updated column name to match spreadsheet
     df[season_col] = pd.to_numeric(df[season_col].str.replace(r'[^\d.]', '', regex=True), errors='coerce')
     
-    # Sort by current season earnings descending
-    df = df.sort_values(season_col, ascending=False)
+    # Sort by current season earnings descending, handling any non-numeric values
+    df[season_col] = pd.to_numeric(df[season_col].str.replace(r'[^\d.]', '', regex=True), errors='coerce')
+    df = df.sort_values(season_col, ascending=False, na_position='last')
     
     # Calculate pagination
     start = page * items_per_page
