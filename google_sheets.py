@@ -150,6 +150,9 @@ def get_top_earners(page=0, items_per_page=10):
     # Sort by Total Earnings descending
     df = df.sort_values('Total Earnings', ascending=False)
     
+    # Format earnings with currency symbol
+    df['Total Earnings'] = df['Total Earnings'].apply(lambda x: f"${x:,.2f}" if pd.notnull(x) else "$0.00")
+    
     # Calculate pagination
     start = page * items_per_page
     end = start + items_per_page
@@ -157,13 +160,14 @@ def get_top_earners(page=0, items_per_page=10):
     return df.iloc[start:end][['Player', 'Total Earnings', 'Club', 'Country']].to_dict('records')
 
 def get_current_season_earners(page=0, items_per_page=10):
-    """Retrieve top earners for current season (2024/25)."""
-    df = pd.DataFrame(player_list_sheet.get_all_records())
+    """Retrieve top earners for current season based on Total minus Ballon d'Or."""
+    earnings_sheet = client.open("Mino Football Earnings - 2024/25").worksheet("Earnings Distribution")
+    df = pd.DataFrame(earnings_sheet.get_all_records())
     df = clean_data(df)
     
     # Convert current season earnings to numeric
-    season_col = '2024/25\nsTLOS'  # Updated column name to match spreadsheet
-    df[season_col] = df[season_col].astype(str)  # Convert to string first
+    season_col = 'Total minus Ballon d\'Or'
+    df[season_col] = df[season_col].astype(str)
     df[season_col] = pd.to_numeric(df[season_col].str.replace(r'[^\d.]', '', regex=True), errors='coerce')
     
     # Sort by current season earnings descending
