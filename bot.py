@@ -326,6 +326,19 @@ async def handle_earnings_list(update: Update, context: ContextTypes.DEFAULT_TYP
     else:
         await query.edit_message_text(message, parse_mode="Markdown")
 
+async def chart_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Send earnings chart for a player."""
+    player_name = ' '.join(context.args)
+    if not player_name:
+        await update.message.reply_text("Please provide a player name. Example: /chart Lionel Messi")
+        return
+
+    chart = get_player_earnings_chart(player_name)
+    if chart:
+        await update.message.reply_photo(photo=chart, caption=f"📈 Earnings chart for {player_name}")
+    else:
+        await update.message.reply_text(f"❌ No data found for {player_name}")
+
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     help_message = (
         "*📚 Mino NFT Bot Commands*\n\n"
@@ -333,7 +346,8 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "🔍 */player <name>* - Search for a specific player\n"
         "Example: `/player Lionel Messi`\n\n"
         "📋 */players* - Browse players with these filters:\n"
-        "💰 */earnings* - View top earners (all-time and current season)\n\n"
+        "💰 */earnings* - View top earners (all-time and current season)\n"
+        "📈 */chart <name>* - View player's earnings chart\n\n"
         "• Show all players\n"
         "• Filter by club\n"
         "• Filter by rarity\n"
@@ -356,6 +370,7 @@ def create_bot():
     application.add_handler(CommandHandler("players", players_command))
     application.add_handler(CommandHandler("player", player_command))
     application.add_handler(CommandHandler("earnings", earnings_command))
+    application.add_handler(CommandHandler("chart", chart_command))
 
     # Callback Handlers
     application.add_handler(CallbackQueryHandler(handle_filter_value_selection, pattern='^filter_.*_value_.*$'))

@@ -214,3 +214,36 @@ def get_player_info(player_name):
 
     logging.info(f"✅ Player info retrieved for: {info['Player']}")
     return info_text, video_link
+def get_player_earnings_chart(player_name):
+    """Generate a line chart of player earnings over time."""
+    earnings_sheet = client.open("Mino Football Earnings - 2024/25").worksheet("Earning Distribution")
+    df = pd.DataFrame(earnings_sheet.get_all_records())
+    
+    # Get player's row
+    player_data = df[df['Player'] == player_name]
+    if player_data.empty:
+        return None
+        
+    # Get all columns except Player, Total, and Ballon d'Or
+    date_columns = [col for col in df.columns if col not in ['Player', 'Total', 'Ballon d\'Or']]
+    
+    # Convert values to numeric
+    earnings = player_data[date_columns].iloc[0].apply(pd.to_numeric, errors='coerce')
+    
+    # Create chart
+    import matplotlib.pyplot as plt
+    plt.figure(figsize=(12, 6))
+    plt.plot(range(len(earnings)), earnings.values, marker='o')
+    plt.xticks(range(len(earnings)), earnings.index, rotation=45, ha='right')
+    plt.title(f"{player_name}'s Earnings Over Time")
+    plt.ylabel('sTLOS')
+    plt.grid(True)
+    plt.tight_layout()
+    
+    # Save to bytes
+    import io
+    buf = io.BytesIO()
+    plt.savefig(buf, format='png')
+    plt.close()
+    buf.seek(0)
+    return buf
