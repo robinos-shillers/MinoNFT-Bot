@@ -224,11 +224,18 @@ def get_player_earnings_chart(player_name):
     if player_data.empty:
         return None
         
-    # Get all columns except Player, Total, and Ballon d'Or
-    date_columns = [col for col in df.columns if col not in ['Player', 'Total', 'Ballon d\'Or']]
+    # Get weekly columns up to the blank column
+    all_columns = df.columns.tolist()
+    weekly_columns = []
+    for col in all_columns:
+        if col in ['Player', 'Total', 'Ballon d\'Or']:
+            continue
+        if pd.isna(col) or col.strip() == '':  # Stop at blank column
+            break
+        weekly_columns.append(col)
     
     # Convert values to numeric
-    earnings = player_data[date_columns].iloc[0].apply(pd.to_numeric, errors='coerce')
+    earnings = player_data[weekly_columns].iloc[0].apply(pd.to_numeric, errors='coerce')
     
     # Create chart
     import matplotlib.pyplot as plt
@@ -237,7 +244,7 @@ def get_player_earnings_chart(player_name):
     plt.xticks(range(len(earnings)), earnings.index, rotation=45, ha='right')
     plt.title(f"{player_name}'s Earnings Over Time")
     plt.ylabel('sTLOS')
-    plt.grid(True)
+    plt.grid(False)  # Remove gridlines
     plt.tight_layout()
     
     # Save to bytes
