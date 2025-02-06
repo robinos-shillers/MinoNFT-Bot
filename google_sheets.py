@@ -162,7 +162,7 @@ def get_current_season_earners(page=0, items_per_page=10):
     df = clean_data(df)
     
     # Convert current season earnings to numeric
-    season_col = '2024/25 sTLOS'
+    season_col = '2024/25\nsTLOS'  # Updated column name to match spreadsheet
     df[season_col] = pd.to_numeric(df[season_col].str.replace(r'[^\d.]', '', regex=True), errors='coerce')
     
     # Sort by current season earnings descending
