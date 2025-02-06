@@ -184,16 +184,50 @@ async def handle_player_selection(update: Update, context: ContextTypes.DEFAULT_
         await query.edit_message_text("❌ An error occurred while loading player details.")
 
 
+# ✅ Handle Player Command
+async def player_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    player_name = ' '.join(context.args)
+    if not player_name:
+        await update.message.reply_text("Please provide a player name. Example: /player Lionel Messi")
+        return
+
+    player_info = get_player_info(player_name)
+    if player_info:
+        info_text, video_link = player_info
+        if video_link:
+            await update.message.reply_video(video=video_link, caption=info_text, parse_mode="Markdown")
+        else:
+            await update.message.reply_text(info_text, parse_mode="Markdown")
+    else:
+        await update.message.reply_text(f"❌ No data found for {player_name}")
+
+# ✅ Handle Pagination
+async def handle_pagination(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    
+    direction, page = query.data.split('_page_')
+    page = int(page)
+    
+    if 'players_list' not in context.user_data:
+        await query.edit_message_text("❌ No player list available.")
+        return
+        
+    players = context.user_data['players_list']
+    await send_player_list(update, context, players, page)
+
 # ✅ Initialize Bot
 def create_bot():
     application = Application.builder().token(TOKEN).build()
 
     # Commands
     application.add_handler(CommandHandler("players", players_command))
+    application.add_handler(CommandHandler("player", player_command))
 
     # Callback Handlers
     application.add_handler(CallbackQueryHandler(handle_filter_value_selection, pattern='^filter_.*_value_.*$'))
     application.add_handler(CallbackQueryHandler(handle_sort_or_filter_selection, pattern='^(sort_|filter_(?!.*_value_).*)$'))
     application.add_handler(CallbackQueryHandler(handle_player_selection, pattern='^player_.*$'))
+    application.add_handler(CallbackQueryHandler(handle_pagination, pattern='^(prev|next)_page_\d+$'))
 
     return application
