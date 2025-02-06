@@ -205,7 +205,7 @@ def get_player_info(player_name):
         f"⚽ Position: {info['Position']}\n"
         f"🏟️ Club: {info['Club']}\n"
         f"🌍 Country: {info['Country']}\n"
-        f"💰 Total Earnings: {info['Total Earnings']} sTLOS\n"
+        f"💰 Total Earnings: {info['Total Earnings']}\n"
         f"💼 2024/25 Earnings: {earnings_2024_25} sTLOS"
     )
 
