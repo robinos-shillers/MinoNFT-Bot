@@ -1,0 +1,35 @@
+INFO:httpx:HTTP Request: POST https://api.telegram.org/bot7258778385:AAGxCyiEaV4yzQsIoy87OqnBC3wkGwVAQus/getMe "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://api.telegram.org/bot7258778385:AAGxCyiEaV4yzQsIoy87OqnBC3wkGwVAQus/deleteWebhook "HTTP/1.1 200 OK"
+INFO:apscheduler.scheduler:Scheduler started
+INFO:telegram.ext.Application:Application started
+INFO:httpx:HTTP Request: POST https://api.telegram.org/bot7258778385:AAGxCyiEaV4yzQsIoy87OqnBC3wkGwVAQus/getUpdates "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://api.telegram.org/bot7258778385:AAGxCyiEaV4yzQsIoy87OqnBC3wkGwVAQus/getUpdates "HTTP/1.1 200 OK"
+INFO:root:✅ Player info retrieved for: Lionel Messi
+INFO:httpx:HTTP Request: POST https://api.telegram.org/bot7258778385:AAGxCyiEaV4yzQsIoy87OqnBC3wkGwVAQus/sendVideo "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://api.telegram.org/bot7258778385:AAGxCyiEaV4yzQsIoy87OqnBC3wkGwVAQus/getUpdates "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://api.telegram.org/bot7258778385:AAGxCyiEaV4yzQsIoy87OqnBC3wkGwVAQus/sendMessage "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://api.telegram.org/bot7258778385:AAGxCyiEaV4yzQsIoy87OqnBC3wkGwVAQus/getUpdates "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://api.telegram.org/bot7258778385:AAGxCyiEaV4yzQsIoy87OqnBC3wkGwVAQus/getUpdates "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://api.telegram.org/bot7258778385:AAGxCyiEaV4yzQsIoy87OqnBC3wkGwVAQus/getUpdates "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://api.telegram.org/bot7258778385:AAGxCyiEaV4yzQsIoy87OqnBC3wkGwVAQus/getUpdates "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://api.telegram.org/bot7258778385:AAGxCyiEaV4yzQsIoy87OqnBC3wkGwVAQus/answerCallbackQuery "HTTP/1.1 200 OK"
+INFO:root:Received action: filter_rarity
+INFO:root:✅ Total active players: 142
+INFO:root:Unique values for Rarity: ['Legend', 'Superstar', 'Wonderkid', 'GOAT', 'HoF']
+INFO:root:Available options for Rarity: ['GOAT', 'HoF', 'Legend', 'Superstar', 'Wonderkid']
+INFO:httpx:HTTP Request: POST https://api.telegram.org/bot7258778385:AAGxCyiEaV4yzQsIoy87OqnBC3wkGwVAQus/editMessageText "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://api.telegram.org/bot7258778385:AAGxCyiEaV4yzQsIoy87OqnBC3wkGwVAQus/getUpdates "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://api.telegram.org/bot7258778385:AAGxCyiEaV4yzQsIoy87OqnBC3wkGwVAQus/answerCallbackQuery "HTTP/1.1 200 OK"
+INFO:root:Received filter selection callback data: filter_rarity_value_GOAT
+INFO:root:Filtering by Rarity: GOAT
+INFO:root:🔍 Executing get_players_by_filter for Rarity = 'GOAT'
+INFO:root:✅ Total active players: 142
+INFO:root:✅ Found 2 players for Rarity = GOAT
+INFO:root:✅ Players found for GOAT: ['Cristiano Ronaldo', 'Lionel Messi']
+INFO:httpx:HTTP Request: POST https://api.telegram.org/bot7258778385:AAGxCyiEaV4yzQsIoy87OqnBC3wkGwVAQus/editMessageText "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://api.telegram.org/bot7258778385:AAGxCyiEaV4yzQsIoy87OqnBC3wkGwVAQus/getUpdates "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://api.telegram.org/bot7258778385:AAGxCyiEaV4yzQsIoy87OqnBC3wkGwVAQus/answerCallbackQuery "HTTP/1.1 200 OK"
+INFO:root:Player selection callback data: player_Cristiano Ronaldo
+INFO:root:✅ Player info retrieved for: Cristiano Ronaldo
+INFO:httpx:HTTP Request: POST https://api.telegram.org/bot7258778385:AAGxCyiEaV4yzQsIoy87OqnBC3wkGwVAQus/sendVideo "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://api.telegram.org/bot7258778385:AAGxCyiEaV4yzQsIoy87OqnBC3wkGwVAQus/getUpdates "HTTP/1.1 200 OK"
