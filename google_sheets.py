@@ -16,125 +16,103 @@ spreadsheet = client.open("Mino Football Earnings - 2024/25")
 player_list_sheet = spreadsheet.worksheet("Player List")
 
 
-# ✅ Data Cleaning (Internal Only)
+# ✅ Data Cleaning (Ensures No Hidden Characters)
 def clean_data(df):
-    """Trim whitespace and remove hidden characters without changing case."""
+    """Trims whitespace, removes hidden characters, and ensures case consistency."""
     for col in ['Player', 'Club', 'Country', 'Rarity']:
-        df[col] = df[col].astype(str).str.strip().str.replace('\u200b', '')  # Remove hidden zero-width spaces
+        df[col] = df[col].astype(str).str.strip().str.replace('\u200b', '')  # Remove zero-width spaces
     return df
 
 
-# ✅ Get Active Players
+# ✅ Get Active Players (Excluding Retired)
 def get_all_players():
-    """Get all active players from the spreadsheet."""
+    """Retrieve all active players, ensuring data is clean and sorted."""
     try:
-        # Refresh credentials if needed
-        if not player_list_sheet.client.auth.valid:
-            player_list_sheet.client.login()
-        
         records = player_list_sheet.get_all_records()
         df = pd.DataFrame(records)
-        
+
         if df.empty:
-            logging.error("Retrieved empty dataframe from sheets")
+            logging.error("❌ Retrieved empty dataframe from sheets")
             return pd.DataFrame()
-            
-        df = clean_data(df)  # Clean data
-        
-        # Get all players (including retired)
-        all_players = df[
+
+        df = clean_data(df)
+
+        # Remove retired players
+        active_players = df[
+            (~df['Club'].str.contains('Retired', case=False, na=False)) &
+            (~df['Country'].str.contains('Retired', case=False, na=False)) &
             (df['Player'].notnull()) &
             (df['Player'].str.strip() != '')
         ].copy()
-        
-        logging.info(f"All players after filtering: {len(all_players)}")
-        return all_players
-        
+
+        logging.info(f"✅ Total active players: {len(active_players)}")
+        return active_players
+
     except Exception as e:
-        logging.error(f"Error getting players: {str(e)}")
+        logging.error(f"❌ Error getting players: {str(e)}")
         return pd.DataFrame()
+
+
+# ✅ Get Players Alphabetically
+def get_players_alphabetically():
+    """Retrieve all active players in alphabetical order."""
+    df = get_all_players()
+
+    if df.empty:
+        logging.warning("⚠️ No active players found.")
+        return []
+
+    # Ensure no blank or duplicate players
+    players = df["Player"].dropna().astype(str).str.strip().unique().tolist()
+    players = sorted(players, key=lambda x: x.lower())  # Case-insensitive sorting
+
+    logging.info(f"✅ Alphabetical Players Retrieved: {len(players)}")
+    logging.info(f"🔎 First 5 Players: {players[:5]}")  # Print first 5 players for debugging
+
+    return players
 
 
 # ✅ Get Players by Filter
 def get_players_by_filter(field, value):
     """Retrieve players based on Club, Country, or Rarity filter."""
-    logging.info(f"Executing get_players_by_filter for {field} = '{value}'")
+    logging.info(f"🔍 Executing get_players_by_filter for {field} = '{value}'")
 
     df = get_all_players()
-    
-    # Add more detailed logging
-    logging.info(f"Total rows in dataframe: {len(df)}")
-    logging.info(f"Sample of {field} values: {df[field].head().tolist()}")
-    
-    # Clean and normalize the data
+    if df.empty:
+        logging.error("⚠️ No data available when filtering players.")
+        return []
+
+    # Normalize field for lookup
     df[field] = df[field].astype(str).str.strip()
     value = str(value).strip()
-    
-    # Ensure data types and clean values
-    df[field] = df[field].fillna('').astype(str).str.strip()
-    value = str(value).strip()
-    
-    # Case-insensitive match
+
+    # Case-insensitive matching
     mask = df[field].str.lower() == value.lower()
     filtered_df = df[mask]
-    
-    # Get players and log results
+
+    # Get list of players
     players = filtered_df["Player"].dropna().tolist()
-    logging.info(f"Found {len(players)} players for {field}={value}: {players}")
-    
+    logging.info(f"✅ Found {len(players)} players for {field} = {value}")
+
     return players
-
-
-# ✅ Get Unique Filter Values
-def get_unique_values(field):
-    """Retrieve unique values for Club, Rarity, or Country, excluding 'Retired'."""
-    df = get_all_players()
-
-    if field in df.columns:
-        unique_values = df[field].dropna().unique()
-
-        # Remove 'Retired' and blank values
-        filtered_values = [
-            value.strip() for value in unique_values
-            if value.lower() != "retired" and value.strip() != ""
-        ]
-
-        logging.info(f"Unique values for {field}: {filtered_values}")
-        return sorted(filtered_values)
-    else:
-        logging.warning(f"Field '{field}' not found in data.")
-    return []
-
-
-# ✅ Get Retired Players
-def get_retired_players():
-    """Retrieve retired players."""
-    df = pd.DataFrame(player_list_sheet.get_all_records())
-    df = clean_data(df)  # ✅ Clean data
-
-    retired_players = df[
-        (df['Club'].str.contains('Retired', case=False, na=False)) |
-        (df['Country'].str.contains('Retired', case=False, na=False))
-    ]
-    logging.info(f"Retired players found: {len(retired_players)}")
-    return retired_players
 
 
 # ✅ Get Player Information
 def get_player_info(player_name):
     """Retrieve player details and NFT video link."""
     df = pd.DataFrame(player_list_sheet.get_all_records())
-    df = clean_data(df)  # ✅ Clean data
+    df = clean_data(df)
 
+    # Case-insensitive search for player
     player_data = df[df["Player"].str.strip().str.lower() == player_name.strip().lower()]
 
     if player_data.empty:
-        logging.warning(f"No data found for player: {player_name}")
+        logging.warning(f"⚠️ No data found for player: {player_name}")
         return None
 
     info = player_data.iloc[0]
 
-    # Detect 2024/25 Earnings Column
+    # ✅ Handle 2024/25 Earnings Column
     earnings_2024_25_column = [col for col in df.columns if "2024/25" in col and "sTLOS" in col]
     earnings_2024_25 = info.get(earnings_2024_25_column[0], 'N/A') if earnings_2024_25_column else 'N/A'
 
@@ -148,6 +126,8 @@ def get_player_info(player_name):
         f"💼 2024/25 Earnings: {earnings_2024_25} sTLOS"
     )
 
+    # ✅ Get NFT Video Link
     video_link = info.get("LINK", None)
-    logging.info(f"Player info retrieved for: {info['Player']}")
+
+    logging.info(f"✅ Player info retrieved for: {info['Player']}")
     return info_text, video_link
