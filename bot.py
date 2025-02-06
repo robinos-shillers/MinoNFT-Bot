@@ -295,11 +295,13 @@ async def handle_earnings_list(update: Update, context: ContextTypes.DEFAULT_TYP
     if type_ == 'alltime':
         earners = get_top_earners(page)
         title = "💰 All-Time Top Earners"
+        note = "_Earnings are the total $USD value taking in the current sTLOS price_"
         next_callback = f'earnings_alltime_{page+1}'
         prev_callback = f'earnings_alltime_{page-1}'
     else:
         earners = get_current_season_earners(page)
         title = "📈 2024/25 Season Top Earners"
+        note = "_2024/25 season earnings are paid in sTLOS_"
         next_callback = f'earnings_current_{page+1}'
         prev_callback = f'earnings_current_{page-1}'
     
@@ -307,7 +309,7 @@ async def handle_earnings_list(update: Update, context: ContextTypes.DEFAULT_TYP
         await query.edit_message_text("❌ No earnings data available.")
         return
     
-    message = f"*{title}*\n\n"
+    message = f"*{title}*\n{note}\n\n"
     for i, player in enumerate(earners, 1):
         earnings = player.get('Total Earnings' if type_ == 'alltime' else 'Total minus Ballon d\'Or', 0)
         message += f"{i}. *{player['Player']}* - {earnings}\n"
