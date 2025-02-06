@@ -12,5 +12,6 @@ language = "python3"
 requiredFiles = [".replit", "replit.nix"]
 
 [deployment]
-run = ["python", "main.py"]
+run = ["sh", "-c", "python bot.py"]
 deploymentTarget = "gce"
+ignorePorts = true
