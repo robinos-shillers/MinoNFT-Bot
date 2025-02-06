@@ -7,7 +7,9 @@ from google_sheets import (
     get_unique_values,
     get_players_by_filter,
     get_retired_players,
-    get_players_alphabetically
+    get_players_alphabetically,
+    get_top_earners,
+    get_current_season_earners
 )
 import os
 
