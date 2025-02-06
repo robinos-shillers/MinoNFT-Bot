@@ -140,6 +140,9 @@ async def handle_filter_value_selection(update: Update, context: ContextTypes.DE
             await send_player_list(update, context, players, page=0)
 
     except Exception as e:
+        logging.error(f"❌ Error in handle_filter_value_selection: {e}")
+        await query.edit_message_text("❌ An error occurred while filtering players.")
+
 
 async def send_filter_options(update, context, options, page, field):
     start = page * ITEMS_PER_PAGE
@@ -166,9 +169,6 @@ async def send_filter_options(update, context, options, page, field):
 
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.callback_query.edit_message_text(f"Select a {field}:", reply_markup=reply_markup)
-
-        logging.error(f"❌ Error in handle_filter_value_selection: {e}")
-        await query.edit_message_text("❌ An error occurred while filtering players.")
 
 
 # ✅ Send Player List (Pagination)
