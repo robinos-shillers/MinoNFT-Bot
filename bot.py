@@ -220,7 +220,7 @@ async def handle_player_selection(update: Update, context: ContextTypes.DEFAULT_
 
         if player_info:
             info_text, video_link = player_info
-            keyboard = [[InlineKeyboardButton("📈 View Earnings Chart", callback_data=f'view_chart_{player_name}')]]
+            keyboard = [[InlineKeyboardButton("📈 View Earnings Chart", callback_data=f'chart_{player_name}')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             if video_link:
                 await query.message.reply_video(video=video_link, caption=info_text, parse_mode="Markdown", reply_markup=reply_markup)
@@ -333,14 +333,22 @@ async def handle_earnings_list(update: Update, context: ContextTypes.DEFAULT_TYP
 
 async def chart_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Send earnings chart for a player."""
-    player_name = ' '.join(context.args)
+    if isinstance(update.callback_query, Update):
+        player_name = ' '.join(context.args)
+    else:
+        player_name = update.callback_query.data.split('_')[1]
+        update = update.callback_query
+        await update.answer()
+
     if not player_name:
         await update.message.reply_text("Please provide a player name. Example: /chart Lionel Messi")
         return
 
     chart = get_player_earnings_chart(player_name)
     if chart:
-        await update.message.reply_photo(photo=chart, caption=f"📈 Earnings chart for {player_name}")
+        keyboard = [[InlineKeyboardButton(player_name, callback_data=f'player_{player_name}')]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await update.message.reply_photo(photo=chart, caption=f"📈 Earnings chart for {player_name}", reply_markup=reply_markup)
     else:
         await update.message.reply_text(f"❌ No data found for {player_name}")
 
@@ -386,7 +394,7 @@ def create_bot():
     application.add_handler(CallbackQueryHandler(handle_filter_pagination, pattern='^filter_(prev|next)_\d+$'))
     application.add_handler(CallbackQueryHandler(handle_back_to_menu, pattern='^back_to_menu$'))
     application.add_handler(CallbackQueryHandler(handle_earnings_list, pattern='^earnings_.*$'))
-    application.add_handler(CallbackQueryHandler(handle_view_chart, pattern='^view_chart_.*$'))
+    application.add_handler(CallbackQueryHandler(chart_command, pattern='^chart_.*$'))
 
     return application
 
