@@ -24,6 +24,7 @@ ITEMS_PER_PAGE = 10
 # ✅ /players Command
 async def players_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
+        [InlineKeyboardButton("📋 Show All", callback_data='filter_all')],
         [InlineKeyboardButton("🏟️ By Club", callback_data='filter_club')],
         [InlineKeyboardButton("⭐ By Rarity", callback_data='filter_rarity')],
         [InlineKeyboardButton("🌍 By Country", callback_data='filter_country')],
@@ -82,6 +83,19 @@ async def handle_sort_or_filter_selection(update: Update, context: ContextTypes.
                 await query.edit_message_text("❌ No retired players found.")
                 return
 
+            context.user_data['players_list'] = players
+            context.user_data['current_page'] = 0
+            await send_player_list(update, context, players, page=0)
+            
+        elif action == 'filter_all':
+            df = get_all_players()
+            players = df["Player"].dropna().tolist()
+            logging.info(f"All players found: {len(players)}")
+            
+            if not players:
+                await query.edit_message_text("❌ No players found.")
+                return
+                
             context.user_data['players_list'] = players
             context.user_data['current_page'] = 0
             await send_player_list(update, context, players, page=0)
