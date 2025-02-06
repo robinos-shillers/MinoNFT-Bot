@@ -1,9 +1,15 @@
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
 import logging
-from google_sheets import get_player_info, get_all_players, get_unique_values, get_players_by_filter, get_retired_players
+from google_sheets import (
+    get_player_info,
+    get_all_players,
+    get_unique_values,
+    get_players_by_filter,
+    get_retired_players,
+    get_players_alphabetically
+)
 import os
-import re
 
 # ✅ Enable Logging
 logging.basicConfig(level=logging.INFO)
@@ -38,33 +44,16 @@ async def handle_sort_or_filter_selection(update: Update, context: ContextTypes.
 
     try:
         if action == 'sort_alpha':
-            try:
-                df = get_all_players()
-                if df.empty:
-                    await query.edit_message_text("❌ No players found in database.")
-                    return
+            players = get_players_alphabetically()
 
-                # Get non-retired players and sort them
-                players = df[~df['Club'].str.contains('Retired', case=False, na=False)]['Player']
-                players = players.dropna().str.strip()
-                players = [p for p in players if p]  # Remove empty strings
-                players.sort(key=str.casefold)  # Case-insensitive sort
-
-                logging.info(f"Total players found: {len(players)}")
-                logging.info(f"First few sorted players: {players[:5]}")
-
-                if not players:
-                    await query.edit_message_text("❌ No players found.")
-                    return
-
-                context.user_data['players_list'] = players
-                context.user_data['current_page'] = 0
-                await send_player_list(update, context, players, page=0)
-
-            except Exception as e:
-                logging.error(f"Error in sort_alpha: {str(e)}")
-                await query.edit_message_text("❌ Error retrieving players.")
+            if not players:
+                await query.edit_message_text("❌ No players found.")
                 return
+
+            logging.info(f"✅ Found {len(players)} players (Alphabetically)")
+            context.user_data['players_list'] = players
+            context.user_data['current_page'] = 0
+            await send_player_list(update, context, players, page=0)
 
         elif action in ['filter_club', 'filter_rarity', 'filter_country']:
             field_map = {
@@ -74,6 +63,10 @@ async def handle_sort_or_filter_selection(update: Update, context: ContextTypes.
             }
             field = field_map[action]
             options = get_unique_values(field)
+
+            if not options:
+                await query.edit_message_text(f"❌ No options found for {field}.")
+                return
 
             logging.info(f"Available options for {field}: {options}")
 
@@ -86,12 +79,16 @@ async def handle_sort_or_filter_selection(update: Update, context: ContextTypes.
             players = retired_df["Player"].dropna().tolist()
             logging.info(f"Retired players found: {players}")
 
+            if not players:
+                await query.edit_message_text("❌ No retired players found.")
+                return
+
             context.user_data['players_list'] = players
             context.user_data['current_page'] = 0
             await send_player_list(update, context, players, page=0)
 
     except Exception as e:
-        logging.error(f"Error in handle_sort_or_filter_selection: {e}")
+        logging.error(f"❌ Error in handle_sort_or_filter_selection: {e}")
         await query.edit_message_text("❌ An error occurred. Please try again.")
 
 
@@ -122,13 +119,13 @@ async def handle_filter_value_selection(update: Update, context: ContextTypes.DE
                 await query.edit_message_text(f"❌ No players found for {filter_value}.")
                 return
 
-            logging.info(f"Players found for {filter_value}: {players}")
+            logging.info(f"✅ Players found for {filter_value}: {players}")
             context.user_data['players_list'] = players
             context.user_data['current_page'] = 0
             await send_player_list(update, context, players, page=0)
 
     except Exception as e:
-        logging.error(f"Error in handle_filter_value_selection: {e}")
+        logging.error(f"❌ Error in handle_filter_value_selection: {e}")
         await query.edit_message_text("❌ An error occurred while filtering players.")
 
 
@@ -138,9 +135,9 @@ async def send_player_list(update, context, players, page):
     end = start + ITEMS_PER_PAGE
     current_players = players[start:end]
 
-    # ✅ Debugging Logs
-    logging.info(f"Displaying players from {start} to {end}")
-    logging.info(f"Players on this page: {current_players}")
+    if not current_players:
+        await update.callback_query.edit_message_text("❌ No players found.")
+        return
 
     keyboard = [[InlineKeyboardButton(player, callback_data=f'player_{player}')] for player in current_players]
 
@@ -183,26 +180,8 @@ async def handle_player_selection(update: Update, context: ContextTypes.DEFAULT_
             await query.message.reply_text(f"❌ No data found for `{player_name}`.", parse_mode="Markdown")
 
     except Exception as e:
-        logging.error(f"Error in handle_player_selection: {e}")
+        logging.error(f"❌ Error in handle_player_selection: {e}")
         await query.edit_message_text("❌ An error occurred while loading player details.")
-
-
-# ✅ Pagination Handlers
-async def handle_pagination(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    query = update.callback_query
-    await query.answer()
-
-    action = query.data
-    logging.info(f"Pagination action: {action}")
-
-    if 'prev_page_' in action or 'next_page_' in action:
-        page = int(action.split('_')[-1])
-        players = context.user_data.get('players_list', [])
-
-        if players:
-            await send_player_list(update, context, players, page)
-        else:
-            await query.edit_message_text("❌ No players found.")
 
 
 # ✅ Initialize Bot
@@ -216,6 +195,5 @@ def create_bot():
     application.add_handler(CallbackQueryHandler(handle_filter_value_selection, pattern='^filter_.*_value_.*$'))
     application.add_handler(CallbackQueryHandler(handle_sort_or_filter_selection, pattern='^(sort_|filter_(?!.*_value_).*)$'))
     application.add_handler(CallbackQueryHandler(handle_player_selection, pattern='^player_.*$'))
-    application.add_handler(CallbackQueryHandler(handle_pagination, pattern='^(prev_page_|next_page_).*'))
 
     return application

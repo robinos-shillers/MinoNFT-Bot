@@ -97,6 +97,46 @@ def get_players_by_filter(field, value):
     return players
 
 
+# ✅ Get Unique Filter Values (Club, Country, Rarity)
+def get_unique_values(field):
+    """Retrieve unique values for Club, Rarity, or Country, excluding 'Retired'."""
+    df = get_all_players()
+
+    if df.empty:
+        logging.error(f"No data found when retrieving unique values for {field}")
+        return []
+
+    if field in df.columns:
+        unique_values = df[field].dropna().unique()
+
+        # Remove "Retired" and blank values
+        filtered_values = [
+            value.strip() for value in unique_values
+            if value.lower() != "retired" and value.strip() != ""
+        ]
+
+        logging.info(f"Unique values for {field}: {filtered_values}")
+        return sorted(filtered_values)
+    else:
+        logging.warning(f"Field '{field}' not found in data.")
+    return []
+
+
+# ✅ Get Retired Players
+def get_retired_players():
+    """Retrieve retired players."""
+    df = pd.DataFrame(player_list_sheet.get_all_records())
+    df = clean_data(df)
+
+    retired_players = df[
+        (df['Club'].str.contains('Retired', case=False, na=False)) |
+        (df['Country'].str.contains('Retired', case=False, na=False))
+    ]
+
+    logging.info(f"Retired players found: {len(retired_players)}")
+    return retired_players
+
+
 # ✅ Get Player Information
 def get_player_info(player_name):
     """Retrieve player details and NFT video link."""
