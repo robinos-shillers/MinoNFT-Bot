@@ -88,16 +88,16 @@ async def handle_sort_or_filter_selection(update: Update, context: ContextTypes.
             context.user_data['players_list'] = players
             context.user_data['current_page'] = 0
             await send_player_list(update, context, players, page=0)
-            
+
         elif action == 'filter_all':
             df = get_all_players()
             players = df["Player"].dropna().tolist()
             logging.info(f"All players found: {len(players)}")
-            
+
             if not players:
                 await query.edit_message_text("❌ No players found.")
                 return
-                
+
             context.user_data['players_list'] = players
             context.user_data['current_page'] = 0
             await send_player_list(update, context, players, page=0)
@@ -148,7 +148,7 @@ async def send_filter_options(update, context, options, page, field):
     start = page * ITEMS_PER_PAGE
     end = start + ITEMS_PER_PAGE
     current_options = options[start:end]
-    
+
     if not current_options:
         await update.callback_query.edit_message_text("❌ No options found.")
         return
@@ -166,7 +166,7 @@ async def send_filter_options(update, context, options, page, field):
 
     if pagination_buttons:
         keyboard.append(pagination_buttons)
-        
+
     # Add back button
     keyboard.append([InlineKeyboardButton("🔙 Back to Menu", callback_data='back_to_menu')])
 
@@ -250,22 +250,57 @@ async def player_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def handle_pagination(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
-    
+
     direction, page = query.data.split('_page_')
     page = int(page)
-    
+
     if 'players_list' not in context.user_data:
         await query.edit_message_text("❌ No player list available.")
         return
-        
+
     players = context.user_data['players_list']
     await send_player_list(update, context, players, page)
+
+# ✅ Start Command
+async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    welcome_message = (
+        "👋 *Welcome to Mino Football Bot!*\n\n"
+        "I help you explore Mino Football NFT players and their earnings.\n\n"
+        "Get started with:\n"
+        "🔍 */player <name>* - Look up a specific player\n"
+        "📋 */players* - Browse all players\n"
+        "❓ */help* - See detailed usage instructions\n\n"
+        "Try */players* to start exploring!"
+    )
+    await update.message.reply_text(welcome_message, parse_mode="Markdown")
+
+# ✅ Help Command
+async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    help_message = (
+        "*📚 Mino Football Bot Commands*\n\n"
+        "*Basic Commands:*\n"
+        "🔍 */player <name>* - Search for a specific player\n"
+        "Example: `/player Lionel Messi`\n\n"
+        "📋 */players* - Browse players with these filters:\n"
+        "• Show all players\n"
+        "• Filter by club\n"
+        "• Filter by rarity\n"
+        "• Filter by country\n"
+        "• View retired players\n\n"
+        "*Tips:*\n"
+        "• Use exact player names for best results\n"
+        "• Navigate through lists using ⬅️ Next/Previous ➡️ buttons\n"
+        "• Return to main menu using 🔙 Back button"
+    )
+    await update.message.reply_text(help_message, parse_mode="Markdown")
 
 # ✅ Initialize Bot
 def create_bot():
     application = Application.builder().token(TOKEN).build()
 
     # Commands
+    application.add_handler(CommandHandler("start", start_command))
+    application.add_handler(CommandHandler("help", help_command))
     application.add_handler(CommandHandler("players", players_command))
     application.add_handler(CommandHandler("player", player_command))
 
@@ -283,7 +318,7 @@ def create_bot():
 async def handle_back_to_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
-    
+
     keyboard = [
         [InlineKeyboardButton("📋 Show All", callback_data='filter_all')],
         [InlineKeyboardButton("🏟️ By Club", callback_data='filter_club')],
@@ -298,14 +333,14 @@ async def handle_back_to_menu(update: Update, context: ContextTypes.DEFAULT_TYPE
 async def handle_filter_pagination(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
-    
+
     direction, page = query.data.split('_')[1:]
     page = int(page)
-    
+
     if 'filter_options' not in context.user_data:
         await query.edit_message_text("❌ No filter options available.")
         return
-    
+
     options = context.user_data['filter_options']
     field_map = {
         'filter_club': 'Club',
