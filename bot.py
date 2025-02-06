@@ -1,6 +1,4 @@
-from telegram._update import Update
-from telegram._inline.inlinekeyboardbutton import InlineKeyboardButton
-from telegram._inline.inlinekeyboardmarkup import InlineKeyboardMarkup
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
 import logging
 from google_sheets import (
