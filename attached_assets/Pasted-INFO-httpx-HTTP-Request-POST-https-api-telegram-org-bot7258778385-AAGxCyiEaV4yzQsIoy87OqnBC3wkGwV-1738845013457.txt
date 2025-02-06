@@ -1,0 +1,27 @@
+INFO:httpx:HTTP Request: POST https://api.telegram.org/bot7258778385:AAGxCyiEaV4yzQsIoy87OqnBC3wkGwVAQus/getMe "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://api.telegram.org/bot7258778385:AAGxCyiEaV4yzQsIoy87OqnBC3wkGwVAQus/deleteWebhook "HTTP/1.1 200 OK"
+INFO:apscheduler.scheduler:Scheduler started
+INFO:telegram.ext.Application:Application started
+INFO:httpx:HTTP Request: POST https://api.telegram.org/bot7258778385:AAGxCyiEaV4yzQsIoy87OqnBC3wkGwVAQus/getUpdates "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://api.telegram.org/bot7258778385:AAGxCyiEaV4yzQsIoy87OqnBC3wkGwVAQus/sendMessage "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://api.telegram.org/bot7258778385:AAGxCyiEaV4yzQsIoy87OqnBC3wkGwVAQus/getUpdates "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://api.telegram.org/bot7258778385:AAGxCyiEaV4yzQsIoy87OqnBC3wkGwVAQus/getUpdates "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://api.telegram.org/bot7258778385:AAGxCyiEaV4yzQsIoy87OqnBC3wkGwVAQus/getUpdates "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://api.telegram.org/bot7258778385:AAGxCyiEaV4yzQsIoy87OqnBC3wkGwVAQus/answerCallbackQuery "HTTP/1.1 200 OK"
+INFO:root:Received action: filter_club
+INFO:root:✅ Total active players: 142
+INFO:root:Unique values for Club: ['Cardiff City', 'PSG', 'Al-Hilal', 'Napoli', 'Al-Duhail', 'Bayern Munich', 'AC Milan', 'Real Sociedad', 'Manchester United', 'Barcelona', 'Atletico Madrid', 'Real Madrid', 'Juventus', 'RB Leipzig', 'Manchester City', 'Arsenal', 'Besiktas', 'Liverpool', 'Al Nassr', 'Porto', 'Aston Villa', 'Internacional', 'Chelsea', 'New York Red Bulls', 'Bournemouth', 'Inter Milan', 'Palmeiras', 'Dortmund', 'Bayer Leverkusen', 'Burnley', 'Fulham', 'LA Galaxy', 'Wolves', 'PSV Eindhoven', 'Club Leon', 'Alajuelense', 'Lille', 'Leicester City', 'Al-Ittihad', "Newell's Old Boys", 'Inter Miami', 'Copenhagen', 'Lazio', 'Lens', 'Corinthians', 'Lorient', 'Santos', 'West Ham', 'Eintracht Frankfurt', 'Olympic Marseille', 'Shabab Al-Ahli', 'Spurs', 'Monaco', 'Fluminese', 'Galatasaray']
+INFO:root:Available options for Club: ['AC Milan', 'Al Nassr', 'Al-Duhail', 'Al-Hilal', 'Al-Ittihad', 'Alajuelense', 'Arsenal', 'Aston Villa', 'Atletico Madrid', 'Barcelona', 'Bayer Leverkusen', 'Bayern Munich', 'Besiktas', 'Bournemouth', 'Burnley', 'Cardiff City', 'Chelsea', 'Club Leon', 'Copenhagen', 'Corinthians', 'Dortmund', 'Eintracht Frankfurt', 'Fluminese', 'Fulham', 'Galatasaray', 'Inter Miami', 'Inter Milan', 'Internacional', 'Juventus', 'LA Galaxy', 'Lazio', 'Leicester City', 'Lens', 'Lille', 'Liverpool', 'Lorient', 'Manchester City', 'Manchester United', 'Monaco', 'Napoli', 'New York Red Bulls', "Newell's Old Boys", 'Olympic Marseille', 'PSG', 'PSV Eindhoven', 'Palmeiras', 'Porto', 'RB Leipzig', 'Real Madrid', 'Real Sociedad', 'Santos', 'Shabab Al-Ahli', 'Spurs', 'West Ham', 'Wolves']
+INFO:httpx:HTTP Request: POST https://api.telegram.org/bot7258778385:AAGxCyiEaV4yzQsIoy87OqnBC3wkGwVAQus/editMessageText "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://api.telegram.org/bot7258778385:AAGxCyiEaV4yzQsIoy87OqnBC3wkGwVAQus/getUpdates "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://api.telegram.org/bot7258778385:AAGxCyiEaV4yzQsIoy87OqnBC3wkGwVAQus/answerCallbackQuery "HTTP/1.1 200 OK"
+INFO:root:Received filter selection callback data: filter_club_value_Real Sociedad
+INFO:root:Filtering by Club: Real Sociedad
+INFO:root:🔍 Executing get_players_by_filter for Club = 'Real Sociedad'
+INFO:root:✅ Total active players: 142
+INFO:root:✅ Found 3 players for Club = Real Sociedad
+INFO:root:✅ Players found for Real Sociedad: ['Ander Barrenetxea', 'Martín Zubimendi', 'Takefusa Kubo']
+INFO:httpx:HTTP Request: POST https://api.telegram.org/bot7258778385:AAGxCyiEaV4yzQsIoy87OqnBC3wkGwVAQus/editMessageText "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://api.telegram.org/bot7258778385:AAGxCyiEaV4yzQsIoy87OqnBC3wkGwVAQus/getUpdates "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://api.telegram.org/bot7258778385:AAGxCyiEaV4yzQsIoy87OqnBC3wkGwVAQus/getUpdates "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://api.telegram.org/bot7258778385:AAGxCyiEaV4yzQsIoy87OqnBC3wkGwVAQus/getUpdates "HTTP/1.1 200 OK"
