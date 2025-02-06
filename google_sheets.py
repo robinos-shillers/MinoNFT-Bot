@@ -161,9 +161,11 @@ def get_top_earners(page=0, items_per_page=10):
 
 def get_current_season_earners(page=0, items_per_page=10):
     """Retrieve top earners for current season based on Total minus Ballon d'Or."""
-    earnings_sheet = client.open("Mino Football Earnings - 2024/25").worksheet("Earning Distribution")
+    earnings_sheet = client.open("Mino Football Earnings - 2024/25").worksheet("Earnings Distribution")
     df = pd.DataFrame(earnings_sheet.get_all_records())
-    df = clean_data(df)
+    
+    # Clean only Player column
+    df['Player'] = df['Player'].astype(str).str.strip().str.replace('\u200b', '')
     
     # Convert current season earnings to numeric
     season_col = 'Total minus Ballon d\'Or'
