@@ -220,10 +220,12 @@ async def handle_player_selection(update: Update, context: ContextTypes.DEFAULT_
 
         if player_info:
             info_text, video_link = player_info
+            keyboard = [[InlineKeyboardButton("📈 View Earnings Chart", callback_data=f'view_chart_{player_name}')]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
             if video_link:
-                await query.message.reply_video(video=video_link, caption=info_text, parse_mode="Markdown")
+                await query.message.reply_video(video=video_link, caption=info_text, parse_mode="Markdown", reply_markup=reply_markup)
             else:
-                await query.message.reply_text(info_text, parse_mode="Markdown")
+                await query.message.reply_text(info_text, parse_mode="Markdown", reply_markup=reply_markup)
         else:
             await query.message.reply_text(f"❌ No data found for `{player_name}`.", parse_mode="Markdown")
 
@@ -272,6 +274,8 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "Get started with:\n"
         "🔍 */player <name>* - Look up a specific player\n"
         "📋 */players* - Browse all players\n"
+        "💰 */earnings* - View top earners\n"
+        "📈 */chart <name>* - View player's earnings chart\n"
         "❓ */help* - See detailed usage instructions\n\n"
         "Try */players* to start exploring!"
     )
@@ -289,10 +293,10 @@ async def earnings_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def handle_earnings_list(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
-    
+
     action, type_, page = query.data.split('_')
     page = int(page)
-    
+
     if type_ == 'alltime':
         earners = get_top_earners(page)
         title = "💰 All-Time Top Earners"
@@ -305,22 +309,22 @@ async def handle_earnings_list(update: Update, context: ContextTypes.DEFAULT_TYP
         note = "_2024/25 season earnings are paid in sTLOS_"
         next_callback = f'earnings_current_{page+1}'
         prev_callback = f'earnings_current_{page-1}'
-    
+
     if not earners:
         await query.edit_message_text("❌ No earnings data available.")
         return
-    
+
     message = f"*{title}*\n{note}\n\n"
     for i, player in enumerate(earners, 1):
         earnings = player.get('Total Earnings' if type_ == 'alltime' else 'Total minus Ballon d\'Or', 0)
         message += f"{i}. *{player['Player']}* - {earnings}\n"
-    
+
     keyboard = []
     if page > 0:
         keyboard.append(InlineKeyboardButton("⬅️ Previous", callback_data=prev_callback))
     if len(earners) == 10:  # If we have full page, assume there might be more
         keyboard.append(InlineKeyboardButton("➡️ Next", callback_data=next_callback))
-    
+
     if keyboard:
         reply_markup = InlineKeyboardMarkup([keyboard])
         await query.edit_message_text(message, reply_markup=reply_markup, parse_mode="Markdown")
@@ -347,13 +351,14 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "🔍 */player <name>* - Search for a specific player\n"
         "Example: `/player Lionel Messi`\n\n"
         "📋 */players* - Browse players with these filters:\n"
-        "💰 */earnings* - View top earners (all-time and current season)\n"
-        "📈 */chart <name>* - View player's earnings chart\n\n"
         "• Show all players\n"
         "• Filter by club\n"
         "• Filter by rarity\n"
         "• Filter by country\n"
         "• View retired players\n\n"
+        "💰 */earnings* - View top earners (all-time and current season)\n"
+        "📈 */chart <name>* - View player's earnings chart\n"
+        "Example: `/chart Lionel Messi`\n\n"
         "*Tips:*\n"
         "• Use exact player names for best results\n"
         "• Navigate through lists using ⬅️ Next/Previous ➡️ buttons\n"
@@ -381,6 +386,7 @@ def create_bot():
     application.add_handler(CallbackQueryHandler(handle_filter_pagination, pattern='^filter_(prev|next)_\d+$'))
     application.add_handler(CallbackQueryHandler(handle_back_to_menu, pattern='^back_to_menu$'))
     application.add_handler(CallbackQueryHandler(handle_earnings_list, pattern='^earnings_.*$'))
+    application.add_handler(CallbackQueryHandler(handle_view_chart, pattern='^view_chart_.*$'))
 
     return application
 
@@ -419,3 +425,13 @@ async def handle_filter_pagination(update: Update, context: ContextTypes.DEFAULT
     }
     field = field_map[context.user_data['current_filter']]
     await send_filter_options(update, context, options, page, field)
+
+async def handle_view_chart(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    try:
+        player_name = query.data.split('_')[2]
+        await chart_command(update, context)
+    except Exception as e:
+        logging.error(f"Error handling view chart: {e}")
+        await query.edit_message_text("An error occurred while loading the chart.")
