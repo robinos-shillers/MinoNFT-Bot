@@ -179,7 +179,7 @@ def get_current_season_earners(page=0, items_per_page=10):
     start = page * items_per_page
     end = start + items_per_page
     
-    return df.iloc[start:end][['Player', season_col, 'Club', 'Country']].to_dict('records')
+    return df.iloc[start:end][['Player', season_col]].to_dict('records')
 
 def get_player_info(player_name):
     """Retrieve player details and NFT video link."""
