@@ -70,9 +70,11 @@ async def handle_sort_or_filter_selection(update: Update, context: ContextTypes.
 
             logging.info(f"Available options for {field}: {options}")
 
-            keyboard = [[InlineKeyboardButton(option, callback_data=f'{action}_value_{option}')] for option in options]
-            reply_markup = InlineKeyboardMarkup(keyboard)
-            await query.edit_message_text(f"Select a {field}:", reply_markup=reply_markup)
+            # Store options in context for pagination
+            context.user_data['filter_options'] = options
+            context.user_data['current_filter'] = action
+            context.user_data['current_filter_page'] = 0
+            await send_filter_options(update, context, options, 0, field)
 
         elif action == 'filter_retired':
             retired_df = get_retired_players()
@@ -138,6 +140,33 @@ async def handle_filter_value_selection(update: Update, context: ContextTypes.DE
             await send_player_list(update, context, players, page=0)
 
     except Exception as e:
+
+async def send_filter_options(update, context, options, page, field):
+    start = page * ITEMS_PER_PAGE
+    end = start + ITEMS_PER_PAGE
+    current_options = options[start:end]
+    
+    if not current_options:
+        await update.callback_query.edit_message_text("❌ No options found.")
+        return
+
+    action = context.user_data['current_filter']
+    keyboard = [[InlineKeyboardButton(option, callback_data=f'{action}_value_{option}')] 
+                for option in current_options]
+
+    # Add pagination buttons
+    pagination_buttons = []
+    if page > 0:
+        pagination_buttons.append(InlineKeyboardButton("⬅️ Previous", callback_data=f'filter_prev_{page-1}'))
+    if end < len(options):
+        pagination_buttons.append(InlineKeyboardButton("➡️ Next", callback_data=f'filter_next_{page+1}'))
+
+    if pagination_buttons:
+        keyboard.append(pagination_buttons)
+
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await update.callback_query.edit_message_text(f"Select a {field}:", reply_markup=reply_markup)
+
         logging.error(f"❌ Error in handle_filter_value_selection: {e}")
         await query.edit_message_text("❌ An error occurred while filtering players.")
 
@@ -242,5 +271,27 @@ def create_bot():
     application.add_handler(CallbackQueryHandler(handle_sort_or_filter_selection, pattern='^(sort_|filter_(?!.*_value_).*)$'))
     application.add_handler(CallbackQueryHandler(handle_player_selection, pattern='^player_.*$'))
     application.add_handler(CallbackQueryHandler(handle_pagination, pattern='^(prev|next)_page_\d+$'))
+    application.add_handler(CallbackQueryHandler(handle_filter_pagination, pattern='^filter_(prev|next)_\d+$'))
 
     return application
+
+
+async def handle_filter_pagination(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    
+    direction, page = query.data.split('_')[1:]
+    page = int(page)
+    
+    if 'filter_options' not in context.user_data:
+        await query.edit_message_text("❌ No filter options available.")
+        return
+    
+    options = context.user_data['filter_options']
+    field_map = {
+        'filter_club': 'Club',
+        'filter_rarity': 'Rarity',
+        'filter_country': 'Country'
+    }
+    field = field_map[context.user_data['current_filter']]
+    await send_filter_options(update, context, options, page, field)
