@@ -24,7 +24,6 @@ ITEMS_PER_PAGE = 10
 # ✅ /players Command
 async def players_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
-        [InlineKeyboardButton("🔤 Alphabetically", callback_data='sort_alpha')],
         [InlineKeyboardButton("🏟️ By Club", callback_data='filter_club')],
         [InlineKeyboardButton("⭐ By Rarity", callback_data='filter_rarity')],
         [InlineKeyboardButton("🌍 By Country", callback_data='filter_country')],
