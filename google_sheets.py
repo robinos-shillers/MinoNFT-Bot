@@ -57,17 +57,18 @@ def get_all_players():
 def get_players_alphabetically():
     """Retrieve all active players in alphabetical order."""
     df = get_all_players()
+    df = clean_data(df)  # Ensure data is clean
 
     if df.empty:
         logging.warning("⚠️ No active players found.")
         return []
 
-    # Ensure no blank or duplicate players
-    players = df["Player"].dropna().astype(str).str.strip().unique().tolist()
-    players = sorted(players, key=lambda x: x.lower())  # Case-insensitive sorting
+    # Get all active players and sort them
+    players = df["Player"].dropna().str.strip().unique().tolist()
+    players = sorted(players, key=str.lower)  # Case-insensitive sorting
 
-    logging.info(f"✅ Alphabetical Players Retrieved: {len(players)}")
-    logging.info(f"🔎 First 5 Players: {players[:5]}")  # Print first 5 players for debugging
+    logging.info(f"✅ Found {len(players)} players (Alphabetically)")
+    logging.info(f"🔎 First 5 Players: {players[:5]}")
 
     return players
 
