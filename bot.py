@@ -264,8 +264,8 @@ async def handle_pagination(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # ✅ Start Command
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     welcome_message = (
-        "👋 *Welcome to Mino Football Bot!*\n\n"
-        "I help you explore Mino Football NFT players and their earnings.\n\n"
+        "👋 *Welcome to the Mino NFT Bot!*\n\n"
+        "I help you explore Mino NFT players and their earnings.\n\n"
         "Get started with:\n"
         "🔍 */player <name>* - Look up a specific player\n"
         "📋 */players* - Browse all players\n"
@@ -277,7 +277,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # ✅ Help Command
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     help_message = (
-        "*📚 Mino Football Bot Commands*\n\n"
+        "*📚 Mino NFT Bot Commands*\n\n"
         "*Basic Commands:*\n"
         "🔍 */player <name>* - Search for a specific player\n"
         "Example: `/player Lionel Messi`\n\n"
