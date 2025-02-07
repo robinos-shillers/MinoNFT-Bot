@@ -8,7 +8,18 @@ logging.basicConfig(level=logging.INFO)
 
 # ✅ Google Sheets Authentication
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-creds = ServiceAccountCredentials.from_json_keyfile_name("credentials.json", scope)
+import os
+import json
+
+credentials_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+
+if credentials_path:
+    with open(credentials_path, "r") as file:
+        credentials_dict = json.load(file)
+    creds = ServiceAccountCredentials.from_json_keyfile_dict(credentials_dict, scope)
+else:
+    raise Exception("Google Cloud credentials not found")
+
 client = gspread.authorize(creds)
 
 # ✅ Open the Google Spreadsheet
