@@ -1,8 +1,7 @@
-
 flask
 gunicorn
-python-telegram-bot
+python-telegram-bot==20.8
 gspread
 oauth2client
 pandas
-telegram
+requests
