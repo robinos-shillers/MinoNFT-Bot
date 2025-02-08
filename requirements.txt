@@ -1,4 +1,5 @@
-flask
+flask[async]
+uvicorn
 python-telegram-bot
 gspread
 oauth2client
