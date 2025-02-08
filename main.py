@@ -23,11 +23,11 @@ def home():
     return "MinoNFT Telegram Bot is Running!"
 
 @app.route(f"/{os.getenv('TELEGRAM_BOT_TOKEN')}", methods=["POST"])
-async def webhook():
+def webhook():
     """Handle incoming Telegram updates asynchronously."""
     try:
         update = Update.de_json(request.get_json(force=True), telegram_app.bot)
-        await telegram_app.process_update(update)  # ✅ Properly await the async function
+        asyncio.create_task(telegram_app.process_update(update))  # ✅ Run in background
         return "OK", 200
     except Exception as e:
         logging.error(f"Error handling webhook: {e}")
@@ -40,4 +40,4 @@ if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
 
     # ✅ Run Flask with async support
-    asyncio.run(app.run(host="0.0.0.0", port=port))
+    app.run(host="0.0.0.0", port=port)
