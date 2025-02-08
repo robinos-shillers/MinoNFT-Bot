@@ -1,3 +1,5 @@
+import os
+import json
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import pandas as pd
@@ -6,25 +8,26 @@ import logging
 # ✅ Enable Logging
 logging.basicConfig(level=logging.INFO)
 
-# ✅ Google Sheets Authentication
+# ✅ Load Google Sheets Credentials from Replit Secrets (Stored as JSON String)
+credentials_json = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")  # This contains the JSON data, not a file path
+
+if not credentials_json:
+    raise ValueError("❌ Google Cloud credentials not found in Replit Secrets.")
+
+# ✅ Parse the JSON string
+credentials_dict = json.loads(credentials_json)
+
+# ✅ Authorize with Google Sheets API
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-import os
-import json
-
-credentials_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
-
-if credentials_path:
-    with open(credentials_path, "r") as file:
-        credentials_dict = json.load(file)
-    creds = ServiceAccountCredentials.from_json_keyfile_dict(credentials_dict, scope)
-else:
-    raise Exception("Google Cloud credentials not found")
-
+creds = ServiceAccountCredentials.from_json_keyfile_dict(credentials_dict, scope)
 client = gspread.authorize(creds)
 
 # ✅ Open the Google Spreadsheet
 spreadsheet = client.open("Mino Football Earnings - 2024/25")
 player_list_sheet = spreadsheet.worksheet("Player List")
+
+logging.info("✅ Successfully connected to Google Sheets.")
+
 
 
 # ✅ Data Cleaning (Ensures No Hidden Characters)
