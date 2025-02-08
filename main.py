@@ -31,13 +31,13 @@ def home():
     return "✅ MinoNFT Telegram Bot is Running!"
 
 @app.route(f"/{os.getenv('TELEGRAM_BOT_TOKEN')}", methods=["POST"])
-async def webhook():
+def webhook():
     """Handle incoming Telegram updates."""
-    update_data = await request.get_json()
+    update_data = request.get_json()  # ✅ Removed `await`
     update = Update.de_json(update_data, telegram_app.bot)
 
     try:
-        await telegram_app.process_update(update)
+        asyncio.create_task(telegram_app.process_update(update))  # ✅ Run asynchronously
         return "OK", 200
     except Exception as e:
         logging.error(f"❌ Webhook processing error: {str(e)}")

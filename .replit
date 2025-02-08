@@ -15,3 +15,11 @@ requiredFiles = [".replit", "replit.nix"]
 run = ["sh", "-c", "python main.py"]
 deploymentTarget = "gce"
 ignorePorts = true
+
+[[ports]]
+localPort = 8080
+externalPort = 80
+
+[[ports]]
+localPort = 10000
+externalPort = 3000
