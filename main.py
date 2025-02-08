@@ -1,10 +1,10 @@
 import logging
 import os
+import asyncio
 from flask import Flask, request
 from telegram import Update
 from telegram.ext import Application
 from bot import create_bot
-import asyncio
 
 # Configure logging
 logging.basicConfig(
@@ -18,13 +18,16 @@ app = Flask(__name__)
 # Create bot instance
 telegram_app: Application = create_bot()
 
-# Explicitly initialize the application before handling updates
+# Ensure bot initialization
 async def initialize_bot():
     """Ensure the bot is properly initialized."""
     await telegram_app.initialize()
 
-# Ensure initialization at startup
-asyncio.run(initialize_bot())
+asyncio.run(initialize_bot())  # Runs once at startup
+
+# Create a new event loop to handle async updates
+event_loop = asyncio.new_event_loop()
+asyncio.set_event_loop(event_loop)
 
 @app.route("/")
 def home():
@@ -33,11 +36,12 @@ def home():
 @app.route(f"/{os.getenv('TELEGRAM_BOT_TOKEN')}", methods=["POST"])
 def webhook():
     """Handle incoming Telegram updates."""
-    update_data = request.get_json()  # ✅ Removed `await`
+    update_data = request.get_json()
     update = Update.de_json(update_data, telegram_app.bot)
 
     try:
-        asyncio.create_task(telegram_app.process_update(update))  # ✅ Run asynchronously
+        # ✅ Fix: Ensure updates are executed in the correct event loop
+        asyncio.run_coroutine_threadsafe(telegram_app.process_update(update), event_loop)
         return "OK", 200
     except Exception as e:
         logging.error(f"❌ Webhook processing error: {str(e)}")
