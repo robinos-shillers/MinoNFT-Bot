@@ -18,37 +18,26 @@ app = Flask(__name__)
 # ✅ Create bot instance
 telegram_app: Application = create_bot()
 
-# ✅ Get Telegram Bot Token from environment
-BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-if not BOT_TOKEN:
-    raise ValueError("❌ TELEGRAM_BOT_TOKEN is not set in environment variables.")
-
 @app.route("/")
 def home():
-    """Basic route to check if the bot is running."""
-    return "✅ MinoNFT Telegram Bot is Running!"
+    return "MinoNFT Telegram Bot is Running!"
 
-@app.route(f"/{BOT_TOKEN}", methods=["POST"])
-def webhook():
-    """Handle incoming Telegram updates."""
+@app.route(f"/{os.getenv('TELEGRAM_BOT_TOKEN')}", methods=["POST"])
+async def webhook():
+    """Handle incoming Telegram updates asynchronously."""
     try:
-        update_data = request.get_json(force=True)
-        update = Update.de_json(update_data, telegram_app.bot)
-        logging.info(f"📩 Received update: {update}")
-
-        # Process update asynchronously
-        asyncio.run(telegram_app.process_update(update))
-
+        update = Update.de_json(request.get_json(force=True), telegram_app.bot)
+        await telegram_app.process_update(update)  # ✅ Properly await the async function
         return "OK", 200
     except Exception as e:
-        logging.error(f"❌ Error in webhook processing: {e}")
-        return "ERROR", 500
+        logging.error(f"Error handling webhook: {e}")
+        return "Error", 500
 
 if __name__ == "__main__":
-    logging.info("🚀 Starting Flask server for webhook handling...")
+    logging.info("Starting bot with Flask...")
 
-    # ✅ Get the port for Railway deployment (default to 8080)
+    # ✅ Get the port for Railway (default to 8080 for Gunicorn)
     port = int(os.environ.get("PORT", 8080))
 
-    # ✅ Start Flask server to handle webhooks
-    app.run(host="0.0.0.0", port=port)
+    # ✅ Run Flask with async support
+    asyncio.run(app.run(host="0.0.0.0", port=port))
