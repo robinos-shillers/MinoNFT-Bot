@@ -1,8 +1,8 @@
 flask
+gunicorn
 uvicorn
-python-telegram-bot[ext]
+python-telegram-bot
 gspread
 oauth2client
 pandas
 requests
-gunicorn

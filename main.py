@@ -5,13 +5,13 @@ from flask import Flask, request
 from bot import create_bot
 from telegram import Update
 
-# ✅ Logging
+# ✅ Logging Setup
 logging.basicConfig(level=logging.INFO)
 
-# ✅ Flask App
+# ✅ Initialize Flask App
 app = Flask(__name__)
 
-# ✅ Telegram Bot
+# ✅ Initialize Telegram Bot
 telegram_app = create_bot()
 
 @app.route("/")
@@ -20,10 +20,12 @@ def home():
 
 @app.route(f"/{os.getenv('TELEGRAM_BOT_TOKEN')}", methods=["POST"])
 async def webhook():
-    """Process Telegram updates."""
+    """Process Telegram webhook updates asynchronously."""
     try:
-        logging.info("📩 Received Telegram update")
         update = Update.de_json(request.get_json(force=True), telegram_app.bot)
+        logging.info(f"📩 Received update: {update}")
+
+        # Process update in background
         asyncio.create_task(telegram_app.process_update(update))
         return "OK", 200
     except Exception as e:
@@ -32,4 +34,5 @@ async def webhook():
 
 if __name__ == "__main__":
     logging.info("🚀 Starting Flask server...")
-    app.run(host="0.0.0.0", port=int(os.getenv("PORT", 8080)))
+    port = int(os.getenv("PORT", 8080))
+    app.run(host="0.0.0.0", port=port)
