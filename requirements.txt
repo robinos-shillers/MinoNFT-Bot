@@ -1,6 +1,4 @@
 flask
-gunicorn
-uvicorn
 python-telegram-bot
 gspread
 oauth2client

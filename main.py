@@ -16,17 +16,17 @@ telegram_app = create_bot()
 
 @app.route("/")
 def home():
-    return "MinoNFT Telegram Bot is Running!"
+    return "✅ MinoNFT Telegram Bot is Running!"
 
 @app.route(f"/{os.getenv('TELEGRAM_BOT_TOKEN')}", methods=["POST"])
-async def webhook():
-    """Process Telegram webhook updates asynchronously."""
+def webhook():
+    """Process Telegram webhook updates."""
     try:
         update_data = request.get_json(force=True)
         logging.info(f"📩 Received update: {update_data}")
 
         update = Update.de_json(update_data, telegram_app.bot)
-        asyncio.create_task(telegram_app.process_update(update))
+        asyncio.run(telegram_app.process_update(update))  # Ensures async handling
 
         return jsonify({"status": "ok"}), 200
 
@@ -36,5 +36,5 @@ async def webhook():
 
 if __name__ == "__main__":
     logging.info("🚀 Starting Flask server...")
-    port = int(os.getenv("PORT", 8080))
+    port = int(os.getenv("PORT", 10000))  # Render defaults to 10000
     app.run(host="0.0.0.0", port=port)
