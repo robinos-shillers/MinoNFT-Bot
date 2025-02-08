@@ -1,11 +1,11 @@
 import logging
 import os
 import asyncio
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from bot import create_bot
 from telegram import Update
 
-# ✅ Logging Setup
+# ✅ Logging Configuration
 logging.basicConfig(level=logging.INFO)
 
 # ✅ Initialize Flask App
@@ -16,21 +16,23 @@ telegram_app = create_bot()
 
 @app.route("/")
 def home():
-    return "MinoNFT Bot is Running!"
+    return "MinoNFT Telegram Bot is Running!"
 
 @app.route(f"/{os.getenv('TELEGRAM_BOT_TOKEN')}", methods=["POST"])
 async def webhook():
     """Process Telegram webhook updates asynchronously."""
     try:
-        update = Update.de_json(request.get_json(force=True), telegram_app.bot)
-        logging.info(f"📩 Received update: {update}")
+        update_data = request.get_json(force=True)
+        logging.info(f"📩 Received update: {update_data}")
 
-        # Process update in background
+        update = Update.de_json(update_data, telegram_app.bot)
         asyncio.create_task(telegram_app.process_update(update))
-        return "OK", 200
+
+        return jsonify({"status": "ok"}), 200
+
     except Exception as e:
         logging.error(f"❌ Webhook error: {e}")
-        return "Error", 500
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
     logging.info("🚀 Starting Flask server...")
