@@ -18,12 +18,15 @@ app = Flask(__name__)
 # Create bot instance
 telegram_app: Application = create_bot()
 
-# Ensure bot initialization
+# Create and assign a persistent event loop
+loop = asyncio.new_event_loop()
+asyncio.set_event_loop(loop)
+
 async def initialize_bot():
     """Ensure the bot is properly initialized."""
     await telegram_app.initialize()
 
-asyncio.run(initialize_bot())  # Runs once at startup
+loop.run_until_complete(initialize_bot())  # Ensures bot starts with an event loop
 
 @app.route("/")
 def home():
@@ -31,13 +34,13 @@ def home():
 
 @app.route(f"/{os.getenv('TELEGRAM_BOT_TOKEN')}", methods=["POST"])
 def webhook():
-    """Handle incoming Telegram updates."""
+    """Handle incoming Telegram updates asynchronously."""
     update_data = request.get_json()
     update = Update.de_json(update_data, telegram_app.bot)
 
     try:
-        # ✅ Fix: Use asyncio.run() to create a new event loop each time
-        asyncio.run(telegram_app.process_update(update))
+        # ✅ Fix: Use create_task to prevent event loop conflicts
+        asyncio.create_task(telegram_app.process_update(update))
         return "OK", 200
     except Exception as e:
         logging.error(f"❌ Webhook processing error: {str(e)}")
