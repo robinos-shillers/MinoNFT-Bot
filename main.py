@@ -5,6 +5,7 @@ from flask import Flask, request
 from telegram import Update
 from telegram.ext import Application
 from bot import create_bot
+from asgiref.sync import async_to_sync
 
 # Configure logging
 logging.basicConfig(
@@ -25,10 +26,6 @@ async def initialize_bot():
 
 asyncio.run(initialize_bot())  # Runs once at startup
 
-# Create a new event loop to handle async updates
-event_loop = asyncio.new_event_loop()
-asyncio.set_event_loop(event_loop)
-
 @app.route("/")
 def home():
     return "✅ MinoNFT Telegram Bot is Running!"
@@ -36,15 +33,18 @@ def home():
 @app.route(f"/{os.getenv('TELEGRAM_BOT_TOKEN')}", methods=["POST"])
 def webhook():
     """Handle incoming Telegram updates."""
-    update_data = request.get_json()
-    update = Update.de_json(update_data, telegram_app.bot)
-
     try:
-        # ✅ Fix: Ensure updates are executed in the correct event loop
-        asyncio.run_coroutine_threadsafe(telegram_app.process_update(update), event_loop)
+        update_data = request.get_json()
+        logging.info(f"📩 Incoming update: {update_data}")  # Log full request
+
+        update = Update.de_json(update_data, telegram_app.bot)
+
+        # ✅ Ensure we execute async functions properly inside Flask
+        async_to_sync(telegram_app.process_update)(update)
+
         return "OK", 200
     except Exception as e:
-        logging.error(f"❌ Webhook processing error: {str(e)}")
+        logging.error(f"❌ Webhook processing error: {str(e)}", exc_info=True)
         return "Internal Server Error", 500
 
 if __name__ == "__main__":
