@@ -23,14 +23,16 @@ def home():
     return "✅ MinoNFT Telegram Bot is Running!"
 
 @app.route(f"/{os.getenv('TELEGRAM_BOT_TOKEN')}", methods=["POST"])
-async def webhook():
-    """Handle incoming Telegram updates asynchronously."""
+def webhook():
+    """Handle incoming Telegram updates synchronously."""
     try:
-        update_data = await request.get_json()  # ✅ Make request async
+        update_data = request.get_json()  # ✅ Remove `await`
         logging.info(f"📩 Incoming update: {update_data}")
 
         update = Update.de_json(update_data, telegram_app.bot)
-        await telegram_app.process_update(update)  # ✅ Run without blocking
+
+        # Process update asynchronously
+        asyncio.create_task(telegram_app.process_update(update))
 
         return "OK", 200
     except Exception as e:
