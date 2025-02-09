@@ -18,7 +18,7 @@ app = Flask(__name__)
 # Create bot instance
 telegram_app: Application = create_bot()
 
-# Create and assign a persistent event loop
+# Create an event loop for the bot
 loop = asyncio.new_event_loop()
 asyncio.set_event_loop(loop)
 
@@ -32,6 +32,10 @@ loop.run_until_complete(initialize_bot())  # Ensures bot starts with an event lo
 def home():
     return "✅ MinoNFT Telegram Bot is Running!"
 
+def async_to_sync(coroutine):
+    """Helper function to run async functions synchronously within Flask."""
+    return asyncio.run(coroutine)
+
 @app.route(f"/{os.getenv('TELEGRAM_BOT_TOKEN')}", methods=["POST"])
 def webhook():
     """Handle incoming Telegram updates asynchronously."""
@@ -39,8 +43,8 @@ def webhook():
     update = Update.de_json(update_data, telegram_app.bot)
 
     try:
-        # ✅ Fix: Use create_task to prevent event loop conflicts
-        asyncio.create_task(telegram_app.process_update(update))
+        # ✅ Fix: Ensure the coroutine is properly awaited using async_to_sync
+        async_to_sync(telegram_app.process_update(update))
         return "OK", 200
     except Exception as e:
         logging.error(f"❌ Webhook processing error: {str(e)}")
