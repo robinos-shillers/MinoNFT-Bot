@@ -23,7 +23,9 @@ def get_event_loop():
     try:
         return asyncio.get_running_loop()
     except RuntimeError:
-        return asyncio.new_event_loop()
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        return loop
 
 loop = get_event_loop()
 
@@ -31,15 +33,20 @@ async def initialize_bot():
     """Ensure the bot is properly initialized and running."""
     await telegram_app.initialize()
     await telegram_app.start()
+    logging.info("✅ Telegram bot started successfully!")
 
 async def shutdown_bot():
     """Properly stop the bot on shutdown."""
     await telegram_app.stop()
+    logging.info("🛑 Telegram bot stopped.")
 
-@app.before_first_request
+# ✅ Initialize bot after Flask starts
+@app.before_request
 def start_bot():
-    """Start the bot in the background before handling requests."""
-    loop.create_task(initialize_bot())
+    """Start the bot when Flask receives its first request."""
+    if not hasattr(app, "bot_started"):
+        loop.create_task(initialize_bot())
+        app.bot_started = True  # Mark that bot has started
 
 @app.route("/")
 def home():
