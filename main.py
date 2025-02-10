@@ -53,13 +53,13 @@ def home():
     return "✅ MinoNFT Telegram Bot is Running!"
 
 @app.route(f"/{os.getenv('TELEGRAM_BOT_TOKEN')}", methods=["POST"])
-async def webhook():
-    """Handle incoming Telegram updates asynchronously."""
-    update_data = await request.get_json()
+def webhook():
+    """Handle incoming Telegram updates synchronously (fix TypeError)."""
+    update_data = request.get_json()  # ❌ Removed 'await' (Flask is sync)
     update = Update.de_json(update_data, telegram_app.bot)
 
     try:
-        await telegram_app.process_update(update)
+        loop.create_task(telegram_app.process_update(update))
         return "OK", 200
     except Exception as e:
         logging.error(f"❌ Webhook processing error: {str(e)}")
@@ -67,10 +67,10 @@ async def webhook():
 
 # ✅ Set webhook manually (optional)
 @app.route("/set_webhook", methods=["GET"])
-async def set_webhook():
+def set_webhook():
     """Register the bot webhook with Telegram."""
     webhook_url = f"{os.getenv('WEBHOOK_URL')}/{os.getenv('TELEGRAM_BOT_TOKEN')}"
-    await telegram_app.bot.setWebhook(webhook_url)
+    telegram_app.bot.setWebhook(webhook_url)
     return f"Webhook set to {webhook_url}", 200
 
 if __name__ == "__main__":
