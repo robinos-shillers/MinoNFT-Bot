@@ -54,8 +54,14 @@ def home():
 
 @app.route(f"/{os.getenv('TELEGRAM_BOT_TOKEN')}", methods=["POST"])
 def webhook():
-    """Handle incoming Telegram updates synchronously (fix TypeError)."""
-    update_data = request.get_json()  # ❌ Removed 'await' (Flask is sync)
+    """Handle incoming Telegram updates synchronously (fix TypeError and KeyError: 'date')."""
+    update_data = request.get_json()
+
+    # ✅ Check if 'date' exists in the message update to prevent KeyError
+    if "date" not in update_data.get("message", {}):
+        logging.warning("⚠️ Received an update without a 'date' field. Ignoring.")
+        return "OK", 200  # Ignore updates that lack a date
+
     update = Update.de_json(update_data, telegram_app.bot)
 
     try:
