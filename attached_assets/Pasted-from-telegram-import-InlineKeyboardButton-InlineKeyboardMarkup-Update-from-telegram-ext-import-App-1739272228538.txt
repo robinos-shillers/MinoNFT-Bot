@@ -1,0 +1,100 @@
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
+import logging
+from google_sheets import (
+    get_player_info,
+    get_all_players,
+    get_unique_values,
+    get_players_by_filter,
+    get_retired_players,
+    get_players_alphabetically,
+    get_top_earners,
+    get_current_season_earners,
+    get_player_earnings_chart,
+    get_january_earnings  # ✅ Importing new function
+)
+import os
+
+# ✅ Enable Logging
+logging.basicConfig(level=logging.INFO)
+
+# ✅ Telegram Bot Token
+TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+
+# Constants
+ITEMS_PER_PAGE = 10
+
+
+# ✅ /earnings Command with January Option
+async def earnings_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    keyboard = [
+        [InlineKeyboardButton("💰 All-Time Top Earners", callback_data='earnings_alltime_0')],
+        [InlineKeyboardButton("📈 2024/25 Top Earners", callback_data='earnings_current_0')],
+        [InlineKeyboardButton("🗓️ January 2025 Top Earners", callback_data='earnings_january_0')]  # ✅ Added option
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await update.message.reply_text("View top earners:", reply_markup=reply_markup)
+
+
+# ✅ Handle Earnings List, including January
+async def handle_earnings_list(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+
+    action, type_, page = query.data.split('_')
+    page = int(page)
+
+    if type_ == 'alltime':
+        earners = get_top_earners(page)
+        title = "💰 All-Time Top Earners"
+        note = "_Earnings are the total $USD value taking in the current sTLOS price_"
+        next_callback = f'earnings_alltime_{page+1}'
+        prev_callback = f'earnings_alltime_{page-1}'
+    elif type_ == 'current':
+        earners = get_current_season_earners(page)
+        title = "📈 2024/25 Season Top Earners"
+        note = "_2024/25 season earnings are paid in sTLOS_"
+        next_callback = f'earnings_current_{page+1}'
+        prev_callback = f'earnings_current_{page-1}'
+    elif type_ == 'january':  # ✅ Handling for January earnings
+        earners = get_january_earnings(page)
+        title = "🗓️ January 2025 Top Earners"
+        note = "_Earnings for January 2025 in sTLOS_"
+        next_callback = f'earnings_january_{page+1}'
+        prev_callback = f'earnings_january_{page-1}'
+    else:
+        return
+
+    if not earners:
+        await query.edit_message_text("❌ No earnings data available.")
+        return
+
+    message = f"*{title}*\n{note}\n\n"
+    for i, player in enumerate(earners, 1):
+        earnings = player.get('January', 0) if type_ == 'january' else player.get('Total Earnings', 0)
+        message += f"{i}. *{player['Player']}* - {earnings} sTLOS\n"
+
+    keyboard = []
+    if page > 0:
+        keyboard.append(InlineKeyboardButton("⬅️ Previous", callback_data=prev_callback))
+    if len(earners) == ITEMS_PER_PAGE:
+        keyboard.append(InlineKeyboardButton("➡️ Next", callback_data=next_callback))
+
+    if keyboard:
+        reply_markup = InlineKeyboardMarkup([keyboard])
+        await query.edit_message_text(message, reply_markup=reply_markup, parse_mode="Markdown")
+    else:
+        await query.edit_message_text(message, parse_mode="Markdown")
+
+
+# ✅ Initialize Bot
+def create_bot():
+    application = Application.builder().token(TOKEN).build()
+
+    # Commands
+    application.add_handler(CommandHandler("earnings", earnings_command))
+
+    # Callback Handlers
+    application.add_handler(CallbackQueryHandler(handle_earnings_list, pattern='^earnings_.*$'))
+
+    return application
