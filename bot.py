@@ -455,8 +455,8 @@ async def handle_filter_pagination(update: Update, context: ContextTypes.DEFAULT
             await query.edit_message_text("❌ No filter options available.")
             return
 
-    options = context.user_data['filter_options']
-    current_filter = context.user_data['current_filter']
+        options = context.user_data['filter_options']
+        current_filter = context.user_data['current_filter']
     
     field_map = {
         'filter_club': 'Club',
