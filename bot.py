@@ -318,6 +318,9 @@ async def handle_earnings_list(update: Update, context: ContextTypes.DEFAULT_TYP
         note = "_Earnings for January 2025 in sTLOS_"
         next_callback = f'earnings_january_{page+1}'
         prev_callback = f'earnings_january_{page-1}'
+        # Add fire emoji to top earner if this is the first page
+        if page == 0 and earners:
+            earners[0]['is_top'] = True
     else:
         return
 
@@ -329,7 +332,8 @@ async def handle_earnings_list(update: Update, context: ContextTypes.DEFAULT_TYP
     for i, player in enumerate(earners, 1):
         if type_ == 'january':
             earnings = player.get('January', 0)
-            message += f"{i}. *{player['Player']}* - {earnings} sTLOS\n"
+            fire_emoji = "🔥 " if player.get('is_top') else ""
+            message += f"{i}. {fire_emoji}*{player['Player']}* - {earnings} sTLOS\n"
         else:
             earnings = player.get('Total Earnings' if type_ == 'alltime' else 'Total minus Ballon d\'Or', 0)
             message += f"{i}. *{player['Player']}* - {earnings}\n"
