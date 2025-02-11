@@ -29,6 +29,59 @@ player_list_sheet = spreadsheet.worksheet("Player List")
 logging.info("✅ Successfully connected to Google Sheets.")
 
 
+def get_top_earners(page=0, items_per_page=10):
+    """Retrieve all-time top earners from the 'Earning Distribution' sheet."""
+    try:
+        earnings_sheet = spreadsheet.worksheet("Earning Distribution")
+        df = pd.DataFrame(earnings_sheet.get_all_records())
+        
+        # Clean Player column
+        df['Player'] = df['Player'].astype(str).str.strip().str.replace('\u200b', '', regex=False)
+        
+        # Calculate total earnings across all months
+        df['Total Earnings'] = df.select_dtypes(include=[float, int]).sum(axis=1)
+        
+        # Sort by total earnings descending
+        df = df.sort_values("Total Earnings", ascending=False, na_position='last')
+        
+        # Pagination
+        start = page * items_per_page
+        end = start + items_per_page
+        
+        return df.iloc[start:end][['Player', 'Total Earnings']].to_dict('records')
+    
+    except Exception as e:
+        logging.error(f"❌ Error retrieving top earners: {str(e)}")
+        return []
+
+
+def get_current_season_earners(page=0, items_per_page=10):
+    """Retrieve current season earners from the 'Earning Distribution' sheet."""
+    try:
+        earnings_sheet = spreadsheet.worksheet("Earning Distribution")
+        df = pd.DataFrame(earnings_sheet.get_all_records())
+        
+        # Clean Player column
+        df['Player'] = df['Player'].astype(str).str.strip().str.replace('\u200b', '', regex=False)
+        
+        # Calculate season total (assuming all columns except 'Player' are earnings)
+        numeric_columns = df.select_dtypes(include=[float, int]).columns
+        df['Total Earnings'] = df[numeric_columns].sum(axis=1)
+        
+        # Sort by total earnings descending
+        df = df.sort_values("Total Earnings", ascending=False, na_position='last')
+        
+        # Pagination
+        start = page * items_per_page
+        end = start + items_per_page
+        
+        return df.iloc[start:end][['Player', 'Total Earnings']].to_dict('records')
+    
+    except Exception as e:
+        logging.error(f"❌ Error retrieving season earners: {str(e)}")
+        return []
+
+
 # ✅ Get January 2025 Earnings
 def get_january_earnings(page=0, items_per_page=10):
     """Retrieve top earners for January 2025 from the 'Earning Distribution' sheet."""
