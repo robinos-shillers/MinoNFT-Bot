@@ -237,6 +237,34 @@ def get_player_earnings_chart(player_name):
     plt.figure(figsize=(12, 6))
     plt.plot(range(len(earnings)), earnings.values, marker='o')
     plt.xticks(range(len(earnings)), earnings.index, rotation=45, ha='right')
+
+def get_top_earners(page=0, items_per_page=10):
+    """Retrieve top earners of all time from the 'Earning Distribution' sheet."""
+    try:
+        earnings_sheet = spreadsheet.worksheet("Earning Distribution")
+        df = pd.DataFrame(earnings_sheet.get_all_records())
+
+        if "Total Earnings" not in df.columns:
+            logging.error("❌ 'Total Earnings' column not found in the sheet.")
+            return []
+
+        # Clean Player column and convert Total Earnings to numeric
+        df['Player'] = df['Player'].astype(str).str.strip().str.replace('\u200b', '', regex=False)
+        df["Total Earnings"] = pd.to_numeric(df["Total Earnings"].astype(str).str.replace(r'[^\d.]', '', regex=True), errors='coerce')
+
+        # Sort by Total Earnings descending
+        df = df.sort_values("Total Earnings", ascending=False, na_position='last')
+
+        # Pagination
+        start = page * items_per_page
+        end = start + items_per_page
+
+        return df.iloc[start:end][['Player', 'Total Earnings']].to_dict('records')
+
+    except Exception as e:
+        logging.error(f"❌ Error retrieving top earners: {str(e)}")
+        return []
+
     plt.title(f"{player_name}'s 2024/25 Season Earnings")
     plt.ylabel('sTLOS')
     plt.grid(False)  # Remove gridlines
