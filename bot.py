@@ -97,6 +97,7 @@ async def handle_sort_or_filter_selection(update: Update, context: ContextTypes.
         elif action == 'filter_all':
             df = get_all_players()
             players = df["Player"].dropna().tolist()
+            players.sort()  # Sort alphabetically
             logging.info(f"All players found: {len(players)}")
 
             if not players:
