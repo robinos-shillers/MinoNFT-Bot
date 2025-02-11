@@ -448,10 +448,9 @@ async def handle_filter_pagination(update: Update, context: ContextTypes.DEFAULT
     await query.answer()
 
     try:
-        # Extract page number from callback data
         page = int(query.data.split('_')[1])
-
-        if 'filter_options' not in context.user_data or 'current_filter' not in context.user_data:
+        
+        if not all(key in context.user_data for key in ['filter_options', 'current_filter']):
             await query.edit_message_text("❌ No filter options available.")
             return
 
@@ -463,17 +462,17 @@ async def handle_filter_pagination(update: Update, context: ContextTypes.DEFAULT
             'filter_rarity': 'Rarity',
             'filter_country': 'Country'
         }
-    
+        
         field = field_map.get(current_filter)
         if not field:
             await query.edit_message_text("❌ Invalid filter type.")
             return
-            
+        
         context.user_data['current_filter_page'] = page
         await send_filter_options(update, context, options, page, field)
     except Exception as e:
         logging.error(f"Error in handle_filter_pagination: {e}")
-        await query.edit_message_text("❌ An error occurred while paginating filters.")
+        await query.message.reply_text("❌ An error occurred while paginating filters.")
 
 async def handle_view_chart(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
