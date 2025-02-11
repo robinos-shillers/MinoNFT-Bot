@@ -277,3 +277,30 @@ def get_top_earners(page=0, items_per_page=10):
     plt.close()
     buf.seek(0)
     return buf
+
+def get_current_season_earners(page=0, items_per_page=10):
+    """Retrieve top earners for current season from the 'Earning Distribution' sheet."""
+    try:
+        earnings_sheet = spreadsheet.worksheet("Earning Distribution")
+        df = pd.DataFrame(earnings_sheet.get_all_records())
+
+        if "Total minus Ballon d'Or" not in df.columns:
+            logging.error("❌ 'Total minus Ballon d'Or' column not found in the sheet.")
+            return []
+
+        # Clean Player column and convert earnings to numeric
+        df['Player'] = df['Player'].astype(str).str.strip().str.replace('\u200b', '', regex=False)
+        df["Total minus Ballon d'Or"] = pd.to_numeric(df["Total minus Ballon d'Or"].astype(str).str.replace(r'[^\d.]', '', regex=True), errors='coerce')
+
+        # Sort by current season earnings descending
+        df = df.sort_values("Total minus Ballon d'Or", ascending=False, na_position='last')
+
+        # Pagination
+        start = page * items_per_page
+        end = start + items_per_page
+
+        return df.iloc[start:end][['Player', "Total minus Ballon d'Or"]].to_dict('records')
+
+    except Exception as e:
+        logging.error(f"❌ Error retrieving current season earners: {str(e)}")
+        return []
