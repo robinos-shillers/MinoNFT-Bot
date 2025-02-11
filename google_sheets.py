@@ -275,6 +275,12 @@ def get_current_season_earners(page=0, items_per_page=10):
     """Retrieve top earners for current season based on Total minus Ballon d'Or."""
     earnings_sheet = client.open("Mino Football Earnings - 2024/25").worksheet("Earning Distribution")
     df = pd.DataFrame(earnings_sheet.get_all_records())
+    
+    # Get the player with highest January earnings
+    january_df = df.copy()
+    january_df["January"] = pd.to_numeric(january_df["January"].astype(str).str.replace(r'[^\d.]', '', regex=True), errors='coerce')
+    january_df = january_df.iloc[:154]  # Exclude rows 155+
+    top_january_player = january_df.nlargest(1, "January")["Player"].iloc[0] if not january_df.empty else None
 
     # Clean only Player column
     df['Player'] = df['Player'].astype(str).str.strip().str.replace('\u200b', '')
@@ -291,7 +297,11 @@ def get_current_season_earners(page=0, items_per_page=10):
     start = page * items_per_page
     end = start + items_per_page
 
-    return df.iloc[start:end][['Player', season_col]].to_dict('records')
+    # Mark the top January earner
+    result_df = df.iloc[start:end][['Player', season_col]].copy()
+    result_df['top_january'] = result_df['Player'] == top_january_player
+
+    return result_df.to_dict('records')
 
 def get_player_info(player_name):
     """Retrieve player details and NFT video link."""

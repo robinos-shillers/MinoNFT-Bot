@@ -335,7 +335,7 @@ async def handle_earnings_list(update: Update, context: ContextTypes.DEFAULT_TYP
             message += f"{i}. *{player['Player']}* - {earnings} sTLOS\n"
         else:
             earnings = player.get('Total Earnings' if type_ == 'alltime' else 'Total minus Ballon d\'Or', 0)
-            fire_emoji = " 🔥" if type_ == 'current' and player.get('is_top') else ""
+            fire_emoji = " 🔥" if type_ == 'current' and player.get('top_january') else ""
             message += f"{i}. *{player['Player']}* - {earnings}{fire_emoji}\n"
 
     keyboard = []
