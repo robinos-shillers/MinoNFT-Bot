@@ -11,7 +11,8 @@ from google_sheets import (
     get_players_alphabetically,
     get_top_earners,
     get_current_season_earners,
-    get_player_earnings_chart
+    get_player_earnings_chart,
+    get_january_earnings
 )
 import os
 
@@ -286,7 +287,8 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def earnings_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
         [InlineKeyboardButton("💰 All-Time Top Earners", callback_data='earnings_alltime_0')],
-        [InlineKeyboardButton("📈 2024/25 Top Earners", callback_data='earnings_current_0')]
+        [InlineKeyboardButton("📈 2024/25 Top Earners", callback_data='earnings_current_0')],
+        [InlineKeyboardButton("🗓️ January 2025 Top Earners", callback_data='earnings_january_0')]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text("View top earners:", reply_markup=reply_markup)
@@ -304,12 +306,20 @@ async def handle_earnings_list(update: Update, context: ContextTypes.DEFAULT_TYP
         note = "_Earnings are the total $USD value taking in the current sTLOS price_"
         next_callback = f'earnings_alltime_{page+1}'
         prev_callback = f'earnings_alltime_{page-1}'
-    else:
+    elif type_ == 'current':
         earners = get_current_season_earners(page)
         title = "📈 2024/25 Season Top Earners"
         note = "_2024/25 season earnings are paid in sTLOS_"
         next_callback = f'earnings_current_{page+1}'
         prev_callback = f'earnings_current_{page-1}'
+    elif type_ == 'january':
+        earners = get_january_earnings(page)
+        title = "🗓️ January 2025 Top Earners"
+        note = "_Earnings for January 2025 in sTLOS_"
+        next_callback = f'earnings_january_{page+1}'
+        prev_callback = f'earnings_january_{page-1}'
+    else:
+        return
 
     if not earners:
         await query.edit_message_text("❌ No earnings data available.")
@@ -317,13 +327,17 @@ async def handle_earnings_list(update: Update, context: ContextTypes.DEFAULT_TYP
 
     message = f"*{title}*\n{note}\n\n"
     for i, player in enumerate(earners, 1):
-        earnings = player.get('Total Earnings' if type_ == 'alltime' else 'Total minus Ballon d\'Or', 0)
-        message += f"{i}. *{player['Player']}* - {earnings}\n"
+        if type_ == 'january':
+            earnings = player.get('January', 0)
+            message += f"{i}. *{player['Player']}* - {earnings} sTLOS\n"
+        else:
+            earnings = player.get('Total Earnings' if type_ == 'alltime' else 'Total minus Ballon d\'Or', 0)
+            message += f"{i}. *{player['Player']}* - {earnings}\n"
 
     keyboard = []
     if page > 0:
         keyboard.append(InlineKeyboardButton("⬅️ Previous", callback_data=prev_callback))
-    if len(earners) == 10:  # If we have full page, assume there might be more
+    if len(earners) == ITEMS_PER_PAGE:
         keyboard.append(InlineKeyboardButton("➡️ Next", callback_data=next_callback))
 
     if keyboard:
