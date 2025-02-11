@@ -420,7 +420,7 @@ def create_bot():
     application.add_handler(CallbackQueryHandler(handle_sort_or_filter_selection, pattern='^(sort_|filter_(?!.*_value_).*)$'))
     application.add_handler(CallbackQueryHandler(handle_player_selection, pattern='^player_.*$'))
     application.add_handler(CallbackQueryHandler(handle_pagination, pattern='^(prev|next)_page_\d+$'))
-    application.add_handler(CallbackQueryHandler(handle_filter_pagination, pattern='^filter_\d+$'))
+    application.add_handler(CallbackQueryHandler(handle_filter_pagination, pattern='^filter_[0-9]+$'))
     application.add_handler(CallbackQueryHandler(handle_back_to_menu, pattern='^back_to_menu$'))
     application.add_handler(CallbackQueryHandler(handle_earnings_list, pattern='^earnings_.*$'))
     application.add_handler(CallbackQueryHandler(chart_command, pattern='^chart_.*$'))
