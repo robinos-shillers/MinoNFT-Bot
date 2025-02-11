@@ -247,10 +247,12 @@ async def player_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     player_info = get_player_info(player_name)
     if player_info:
         info_text, video_link = player_info
+        keyboard = [[InlineKeyboardButton("📈 View Earnings Chart", callback_data=f'chart_{player_name}')]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
         if video_link:
-            await update.message.reply_video(video=video_link, caption=info_text, parse_mode="Markdown")
+            await update.message.reply_video(video=video_link, caption=info_text, parse_mode="Markdown", reply_markup=reply_markup)
         else:
-            await update.message.reply_text(info_text, parse_mode="Markdown")
+            await update.message.reply_text(info_text, parse_mode="Markdown", reply_markup=reply_markup)
     else:
         await update.message.reply_text(f"❌ No data found for {player_name}")
 
