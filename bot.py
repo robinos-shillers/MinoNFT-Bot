@@ -355,12 +355,13 @@ async def handle_earnings_list(update: Update, context: ContextTypes.DEFAULT_TYP
 
 async def chart_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Send earnings chart for a player."""
-    if isinstance(update.callback_query, Update):
-        player_name = ' '.join(context.args)
-    else:
+    if update.callback_query:
         player_name = update.callback_query.data.split('_')[1]
-        update = update.callback_query
-        await update.answer()
+        await update.callback_query.answer()
+        message = update.callback_query.message
+    else:
+        player_name = ' '.join(context.args)
+        message = update.message
 
     if not player_name:
         await update.message.reply_text("Please provide a player name. Example: /chart Lionel Messi")
@@ -370,9 +371,9 @@ async def chart_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if chart:
         keyboard = [[InlineKeyboardButton(player_name, callback_data=f'player_{player_name}')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        await update.message.reply_photo(photo=chart, caption=f"📈 Earnings chart for {player_name}", reply_markup=reply_markup)
+        await message.reply_photo(photo=chart, caption=f"📈 Earnings chart for {player_name}", reply_markup=reply_markup)
     else:
-        await update.message.reply_text(f"❌ No data found for {player_name}")
+        await message.reply_text(f"❌ No data found for {player_name}")
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     help_message = (
