@@ -238,33 +238,6 @@ def get_player_earnings_chart(player_name):
     plt.plot(range(len(earnings)), earnings.values, marker='o')
     plt.xticks(range(len(earnings)), earnings.index, rotation=45, ha='right')
 
-def get_top_earners(page=0, items_per_page=10):
-    """Retrieve top earners of all time from the 'Earning Distribution' sheet."""
-    try:
-        earnings_sheet = spreadsheet.worksheet("Earning Distribution")
-        df = pd.DataFrame(earnings_sheet.get_all_records())
-
-        if "Total Earnings" not in df.columns:
-            logging.error("❌ 'Total Earnings' column not found in the sheet.")
-            return []
-
-        # Clean Player column and convert Total Earnings to numeric
-        df['Player'] = df['Player'].astype(str).str.strip().str.replace('\u200b', '', regex=False)
-        df["Total Earnings"] = pd.to_numeric(df["Total Earnings"].astype(str).str.replace(r'[^\d.]', '', regex=True), errors='coerce')
-
-        # Sort by Total Earnings descending
-        df = df.sort_values("Total Earnings", ascending=False, na_position='last')
-
-        # Pagination
-        start = page * items_per_page
-        end = start + items_per_page
-
-        return df.iloc[start:end][['Player', 'Total Earnings']].to_dict('records')
-
-    except Exception as e:
-        logging.error(f"❌ Error retrieving top earners: {str(e)}")
-        return []
-
     plt.title(f"{player_name}'s 2024/25 Season Earnings")
     plt.ylabel('sTLOS')
     plt.grid(False)  # Remove gridlines
@@ -278,29 +251,78 @@ def get_top_earners(page=0, items_per_page=10):
     buf.seek(0)
     return buf
 
+def get_top_earners(page=0, items_per_page=10):
+    """Retrieve top earners of all time sorted by Total Earnings."""
+    df = pd.DataFrame(player_list_sheet.get_all_records())
+    df = clean_data(df)
+
+    # Convert Total Earnings to numeric, removing any currency symbols
+    df['Total Earnings'] = pd.to_numeric(df['Total Earnings'].str.replace(r'[^\d.]', '', regex=True), errors='coerce')
+
+    # Sort by Total Earnings descending
+    df = df.sort_values('Total Earnings', ascending=False)
+
+    # Format earnings with currency symbol
+    df['Total Earnings'] = df['Total Earnings'].apply(lambda x: f"${x:,.2f}" if pd.notnull(x) else "$0.00")
+
+    # Calculate pagination
+    start = page * items_per_page
+    end = start + items_per_page
+
+    return df.iloc[start:end][['Player', 'Total Earnings', 'Club', 'Country']].to_dict('records')
+
 def get_current_season_earners(page=0, items_per_page=10):
-    """Retrieve top earners for current season from the 'Earning Distribution' sheet."""
-    try:
-        earnings_sheet = spreadsheet.worksheet("Earning Distribution")
-        df = pd.DataFrame(earnings_sheet.get_all_records())
+    """Retrieve top earners for current season based on Total minus Ballon d'Or."""
+    earnings_sheet = client.open("Mino Football Earnings - 2024/25").worksheet("Earning Distribution")
+    df = pd.DataFrame(earnings_sheet.get_all_records())
 
-        if "Total minus Ballon d'Or" not in df.columns:
-            logging.error("❌ 'Total minus Ballon d'Or' column not found in the sheet.")
-            return []
+    # Clean only Player column
+    df['Player'] = df['Player'].astype(str).str.strip().str.replace('\u200b', '')
 
-        # Clean Player column and convert earnings to numeric
-        df['Player'] = df['Player'].astype(str).str.strip().str.replace('\u200b', '', regex=False)
-        df["Total minus Ballon d'Or"] = pd.to_numeric(df["Total minus Ballon d'Or"].astype(str).str.replace(r'[^\d.]', '', regex=True), errors='coerce')
+    # Convert current season earnings to numeric
+    season_col = 'Total minus Ballon d\'Or'
+    df[season_col] = df[season_col].astype(str)
+    df[season_col] = pd.to_numeric(df[season_col].str.replace(r'[^\d.]', '', regex=True), errors='coerce')
 
-        # Sort by current season earnings descending
-        df = df.sort_values("Total minus Ballon d'Or", ascending=False, na_position='last')
+    # Sort by current season earnings descending
+    df = df.sort_values(season_col, ascending=False, na_position='last')
 
-        # Pagination
-        start = page * items_per_page
-        end = start + items_per_page
+    # Calculate pagination
+    start = page * items_per_page
+    end = start + items_per_page
 
-        return df.iloc[start:end][['Player', "Total minus Ballon d'Or"]].to_dict('records')
+    return df.iloc[start:end][['Player', season_col]].to_dict('records')
 
-    except Exception as e:
-        logging.error(f"❌ Error retrieving current season earners: {str(e)}")
-        return []
+def get_player_info(player_name):
+    """Retrieve player details and NFT video link."""
+    df = pd.DataFrame(player_list_sheet.get_all_records())
+    df = clean_data(df)
+
+    # Case-insensitive search for player
+    player_data = df[df["Player"].str.strip().str.lower() == player_name.strip().lower()]
+
+    if player_data.empty:
+        logging.warning(f"⚠️ No data found for player: {player_name}")
+        return None
+
+    info = player_data.iloc[0]
+
+    # ✅ Handle 2024/25 Earnings Column
+    earnings_2024_25_column = [col for col in df.columns if "2024/25" in col and "sTLOS" in col]
+    earnings_2024_25 = info.get(earnings_2024_25_column[0], 'N/A') if earnings_2024_25_column else 'N/A'
+
+    info_text = (
+        f"🔹 *{info['Player']}* 🔹\n"
+        f"🎭 Rarity: {info['Rarity']}\n"
+        f"⚽ Position: {info['Position']}\n"
+        f"🏟️ Club: {info['Club']}\n"
+        f"🌍 Country: {info['Country']}\n"
+        f"💰 Total Earnings: {info['Total Earnings']}\n"
+        f"💼 2024/25 Earnings: {earnings_2024_25} sTLOS"
+    )
+
+    # ✅ Get NFT Video Link
+    video_link = info.get("LINK", None)
+
+    logging.info(f"✅ Player info retrieved for: {info['Player']}")
+    return info_text, video_link
