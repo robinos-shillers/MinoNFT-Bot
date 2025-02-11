@@ -457,8 +457,8 @@ async def handle_filter_pagination(update: Update, context: ContextTypes.DEFAULT
 
         options = context.user_data['filter_options']
         current_filter = context.user_data['current_filter']
-    
-    field_map = {
+        
+        field_map = {
         'filter_club': 'Club',
         'filter_rarity': 'Rarity',
         'filter_country': 'Country'
