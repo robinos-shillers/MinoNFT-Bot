@@ -245,7 +245,7 @@ def get_player_earnings_chart(player_name):
     # Create chart
     import matplotlib.pyplot as plt
     plt.figure(figsize=(12, 6))
-    plt.plot(range(len(earnings)), earnings.values, marker='o')
+    plt.plot(range(len(earnings)), earnings.values)
     plt.xticks(range(len(earnings)), earnings.index, rotation=45, ha='right')
 
     plt.title(f"{player_name}'s 2024/25 Season Earnings")
