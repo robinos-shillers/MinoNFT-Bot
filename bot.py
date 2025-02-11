@@ -450,13 +450,7 @@ async def handle_filter_pagination(update: Update, context: ContextTypes.DEFAULT
     try:
         page = int(query.data.split('_')[1])
         
-        if not all(key in context.user_data for key in ['filter_options', 'current_filter']):
-            await query.edit_message_text("❌ No filter options available.")
-            return
-
-        options = context.user_data.get('filter_options', [])
         current_filter = context.user_data.get('current_filter')
-        
         field_map = {
             'filter_club': 'Club',
             'filter_rarity': 'Rarity',
@@ -468,10 +462,12 @@ async def handle_filter_pagination(update: Update, context: ContextTypes.DEFAULT
             await query.edit_message_text("❌ Invalid filter type.")
             return
 
-        if page * 10 >= len(options):
-            await query.answer("No more options available")
+        options = get_unique_values(field)
+        if not options:
+            await query.edit_message_text("❌ No options available.")
             return
             
+        context.user_data['filter_options'] = options
         context.user_data['current_filter_page'] = page
         await send_filter_options(update, context, options, page, field)
     except Exception as e:
