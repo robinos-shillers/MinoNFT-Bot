@@ -171,7 +171,7 @@ def get_january_earnings(page=0, items_per_page=10):
         # Pagination
         start = page * items_per_page
         end = start + items_per_page
-        
+
         # Get records with pagination
         records = df.iloc[start:end][['Player', 'January']].to_dict('records')
         if records:
@@ -219,6 +219,7 @@ def get_player_info(player_name):
 
     logging.info(f"✅ Player info retrieved for: {info['Player']}")
     return info_text, video_link
+
 def get_player_earnings_chart(player_name):
     """Generate a line chart of player earnings over time."""
     earnings_sheet = client.open("Mino Football Earnings - 2024/25").worksheet("Earning Distribution")
@@ -285,7 +286,7 @@ def get_current_season_earners(page=0, items_per_page=10):
     """Retrieve top earners for current season based on Total minus Ballon d'Or."""
     earnings_sheet = client.open("Mino Football Earnings - 2024/25").worksheet("Earning Distribution")
     df = pd.DataFrame(earnings_sheet.get_all_records())
-    
+
     # Get the player with highest January earnings
     january_df = df.copy()
     january_df["January"] = pd.to_numeric(january_df["January"].astype(str).str.replace(r'[^\d.]', '', regex=True), errors='coerce')
@@ -312,37 +313,3 @@ def get_current_season_earners(page=0, items_per_page=10):
     result_df['top_january'] = result_df['Player'] == top_january_player
 
     return result_df.to_dict('records')
-
-def get_player_info(player_name):
-    """Retrieve player details and NFT video link."""
-    df = pd.DataFrame(player_list_sheet.get_all_records())
-    df = clean_data(df)
-
-    # Case-insensitive search for player
-    player_data = df[df["Player"].str.strip().str.lower() == player_name.strip().lower()]
-
-    if player_data.empty:
-        logging.warning(f"⚠️ No data found for player: {player_name}")
-        return None
-
-    info = player_data.iloc[0]
-
-    # ✅ Handle 2024/25 Earnings Column
-    earnings_2024_25_column = [col for col in df.columns if "2024/25" in col and "sTLOS" in col]
-    earnings_2024_25 = info.get(earnings_2024_25_column[0], 'N/A') if earnings_2024_25_column else 'N/A'
-
-    info_text = (
-        f"🔹 *{info['Player']}* 🔹\n"
-        f"🎭 Rarity: {info['Rarity']}\n"
-        f"⚽ Position: {info['Position']}\n"
-        f"🏟️ Club: {info['Club']}\n"
-        f"🌍 Country: {info['Country']}\n"
-        f"💰 Total Earnings: {info['Total Earnings']}\n"
-        f"💼 2024/25 Earnings: {earnings_2024_25} sTLOS"
-    )
-
-    # ✅ Get NFT Video Link
-    video_link = info.get("LINK", None)
-
-    logging.info(f"✅ Player info retrieved for: {info['Player']}")
-    return info_text, video_link
