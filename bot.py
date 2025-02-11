@@ -448,7 +448,7 @@ async def handle_filter_pagination(update: Update, context: ContextTypes.DEFAULT
     await query.answer()
 
     # Extract page number from callback data
-    page = int(query.data.split('_')[-1])
+    page = int(query.data.split('_')[1])  # Changed to handle direct page number
 
     if 'filter_options' not in context.user_data or 'current_filter' not in context.user_data:
         await query.edit_message_text("❌ No filter options available.")
