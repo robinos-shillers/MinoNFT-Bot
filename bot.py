@@ -447,20 +447,28 @@ async def handle_filter_pagination(update: Update, context: ContextTypes.DEFAULT
     query = update.callback_query
     await query.answer()
 
-    direction, page = query.data.split('_')[1:]
-    page = int(page)
+    # Extract page number from callback data
+    page = int(query.data.split('_')[-1])
 
-    if 'filter_options' not in context.user_data:
+    if 'filter_options' not in context.user_data or 'current_filter' not in context.user_data:
         await query.edit_message_text("❌ No filter options available.")
         return
 
     options = context.user_data['filter_options']
+    current_filter = context.user_data['current_filter']
+    
     field_map = {
         'filter_club': 'Club',
         'filter_rarity': 'Rarity',
         'filter_country': 'Country'
     }
-    field = field_map[context.user_data['current_filter']]
+    
+    field = field_map.get(current_filter)
+    if not field:
+        await query.edit_message_text("❌ Invalid filter type.")
+        return
+        
+    context.user_data['current_filter_page'] = page
     await send_filter_options(update, context, options, page, field)
 
 async def handle_view_chart(update: Update, context: ContextTypes.DEFAULT_TYPE):
