@@ -2,6 +2,7 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
 import logging
 import os
+from google_sheets import get_top_earners, get_current_season_earners, get_january_earnings
 
 # ✅ Enable Logging
 logging.basicConfig(level=logging.INFO)
@@ -26,7 +27,6 @@ async def earnings_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # ✅ Handle Earnings Selection
 async def handle_earnings_selection(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handles the selection of earnings categories."""
-    from google_sheets import get_top_earners, get_current_season_earners, get_january_earnings  # ✅ Import inside function
 
     query = update.callback_query
     await query.answer()
