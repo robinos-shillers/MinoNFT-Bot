@@ -1,0 +1,24 @@
+INFO:root:Received action: filter_club
+INFO:root:✅ Total active players: 142
+INFO:root:Unique values for Club: ['Manchester City', 'Barcelona', 'Aston Villa', 'Liverpool', 'Bayern Munich', 'Arsenal', 'RB Leipzig', 'Spurs', 'Lille', 'Real Madrid', 'AC Milan', 'PSG', 'Atletico Madrid', 'Al Nassr', 'Dortmund', 'Bayer Leverkusen', 'Chelsea', 'Fulham', 'Napoli', 'Real Sociedad', 'Inter Milan', 'Inter Miami', 'Juventus', 'Manchester United', 'Monaco', 'Lazio', 'Olympic Marseille', 'Bournemouth', 'Al-Duhail', 'Leicester City', 'Club Leon', 'Galatasaray', 'Wolves', 'Al-Hilal', 'Internacional', 'Shabab Al-Ahli', 'West Ham', 'PSV Eindhoven', 'Porto', 'Alajuelense', 'Eintracht Frankfurt', 'Lens', 'Cardiff City', 'Burnley', 'LA Galaxy', 'Besiktas', 'New York Red Bulls', 'Palmeiras', 'Al-Ittihad', "Newell's Old Boys", 'Copenhagen', 'Corinthians', 'Lorient', 'Santos', 'Fluminese']
+INFO:root:Available options for Club: ['AC Milan', 'Al Nassr', 'Al-Duhail', 'Al-Hilal', 'Al-Ittihad', 'Alajuelense', 'Arsenal', 'Aston Villa', 'Atletico Madrid', 'Barcelona', 'Bayer Leverkusen', 'Bayern Munich', 'Besiktas', 'Bournemouth', 'Burnley', 'Cardiff City', 'Chelsea', 'Club Leon', 'Copenhagen', 'Corinthians', 'Dortmund', 'Eintracht Frankfurt', 'Fluminese', 'Fulham', 'Galatasaray', 'Inter Miami', 'Inter Milan', 'Internacional', 'Juventus', 'LA Galaxy', 'Lazio', 'Leicester City', 'Lens', 'Lille', 'Liverpool', 'Lorient', 'Manchester City', 'Manchester United', 'Monaco', 'Napoli', 'New York Red Bulls', "Newell's Old Boys", 'Olympic Marseille', 'PSG', 'PSV Eindhoven', 'Palmeiras', 'Porto', 'RB Leipzig', 'Real Madrid', 'Real Sociedad', 'Santos', 'Shabab Al-Ahli', 'Spurs', 'West Ham', 'Wolves']
+INFO:httpx:HTTP Request: POST https://api.telegram.org/bot7227076938:AAHvnWmAJ-uvwFmgtF3NYHUYbOXxROP0vzk/editMessageText "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://api.telegram.org/bot7227076938:AAHvnWmAJ-uvwFmgtF3NYHUYbOXxROP0vzk/getUpdates "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://api.telegram.org/bot7227076938:AAHvnWmAJ-uvwFmgtF3NYHUYbOXxROP0vzk/answerCallbackQuery "HTTP/1.1 200 OK"
+INFO:root:Received action: filter_1
+INFO:httpx:HTTP Request: POST https://api.telegram.org/bot7227076938:AAHvnWmAJ-uvwFmgtF3NYHUYbOXxROP0vzk/getUpdates "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://api.telegram.org/bot7227076938:AAHvnWmAJ-uvwFmgtF3NYHUYbOXxROP0vzk/answerCallbackQuery "HTTP/1.1 200 OK"
+INFO:root:Received action: filter_1
+INFO:httpx:HTTP Request: POST https://api.telegram.org/bot7227076938:AAHvnWmAJ-uvwFmgtF3NYHUYbOXxROP0vzk/getUpdates "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://api.telegram.org/bot7227076938:AAHvnWmAJ-uvwFmgtF3NYHUYbOXxROP0vzk/answerCallbackQuery "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://api.telegram.org/bot7227076938:AAHvnWmAJ-uvwFmgtF3NYHUYbOXxROP0vzk/editMessageText "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://api.telegram.org/bot7227076938:AAHvnWmAJ-uvwFmgtF3NYHUYbOXxROP0vzk/getUpdates "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://api.telegram.org/bot7227076938:AAHvnWmAJ-uvwFmgtF3NYHUYbOXxROP0vzk/answerCallbackQuery "HTTP/1.1 200 OK"
+INFO:root:Received action: filter_country
+INFO:root:✅ Total active players: 142
+INFO:root:Unique values for Country: ['Spain', 'Argentina', 'Egypt', 'Norway', 'Poland', 'England', 'Germany', 'Slovenia', 'Korea Republic', 'Canada', 'Brazil', 'USA', 'Morocco', 'France', 'Portugal', 'Uruguay', 'Netherlands', 'Croatia', 'Belgium', 'Switzerland', 'Wales', 'Japan', 'Ecuador', 'Italy', 'Mexico', 'Cameroon', 'Denmark', 'Ghana', 'Austria', 'Senegal', 'Qatar', 'Colombia', 'Nigeria', 'IR Iran', 'Saudi Arabia', 'Costa Rica', 'Serbia', 'Australia', 'Tunisia', 'Scotland', 'Sweden']
+INFO:root:Available options for Country: ['Argentina', 'Australia', 'Austria', 'Belgium', 'Brazil', 'Cameroon', 'Canada', 'Colombia', 'Costa Rica', 'Croatia', 'Denmark', 'Ecuador', 'Egypt', 'England', 'France', 'Germany', 'Ghana', 'IR Iran', 'Italy', 'Japan', 'Korea Republic', 'Mexico', 'Morocco', 'Netherlands', 'Nigeria', 'Norway', 'Poland', 'Portugal', 'Qatar', 'Saudi Arabia', 'Scotland', 'Senegal', 'Serbia', 'Slovenia', 'Spain', 'Sweden', 'Switzerland', 'Tunisia', 'USA', 'Uruguay', 'Wales']
+INFO:httpx:HTTP Request: POST https://api.telegram.org/bot7227076938:AAHvnWmAJ-uvwFmgtF3NYHUYbOXxROP0vzk/editMessageText "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://api.telegram.org/bot7227076938:AAHvnWmAJ-uvwFmgtF3NYHUYbOXxROP0vzk/getUpdates "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: POST https://api.telegram.org/bot7227076938:AAHvnWmAJ-uvwFmgtF3NYHUYbOXxROP0vzk/answerCallbackQuery "HTTP/1.1 200 OK"
+INFO:root:Received action: filter_1
