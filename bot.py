@@ -459,18 +459,21 @@ async def handle_filter_pagination(update: Update, context: ContextTypes.DEFAULT
         current_filter = context.user_data['current_filter']
         
         field_map = {
-        'filter_club': 'Club',
-        'filter_rarity': 'Rarity',
-        'filter_country': 'Country'
-    }
+            'filter_club': 'Club',
+            'filter_rarity': 'Rarity',
+            'filter_country': 'Country'
+        }
     
-    field = field_map.get(current_filter)
-    if not field:
-        await query.edit_message_text("❌ Invalid filter type.")
-        return
-        
-    context.user_data['current_filter_page'] = page
-    await send_filter_options(update, context, options, page, field)
+        field = field_map.get(current_filter)
+        if not field:
+            await query.edit_message_text("❌ Invalid filter type.")
+            return
+            
+        context.user_data['current_filter_page'] = page
+        await send_filter_options(update, context, options, page, field)
+    except Exception as e:
+        logging.error(f"Error in handle_filter_pagination: {e}")
+        await query.edit_message_text("❌ An error occurred while paginating filters.")
 
 async def handle_view_chart(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
