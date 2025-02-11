@@ -153,6 +153,9 @@ def get_january_earnings(page=0, items_per_page=10):
             logging.error("❌ 'January' column not found in the sheet.")
             return []
 
+        # Get total payout from row 156
+        total_payout = df.iloc[155]["January"] if len(df) > 155 else 0
+
         # Clean Player column
         df['Player'] = df['Player'].astype(str).str.strip().str.replace('\u200b', '', regex=False)
 
@@ -161,6 +164,9 @@ def get_january_earnings(page=0, items_per_page=10):
 
         # Exclude rows from index 154 onwards
         df = df.iloc[:153]
+
+        # Add total payout note
+        df.attrs['payout_note'] = f"The total amount paid out in January was {total_payout} sTLOS."
 
         # Sort by January earnings descending
         df = df.sort_values("January", ascending=False, na_position='last')

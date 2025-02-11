@@ -319,7 +319,8 @@ async def handle_earnings_list(update: Update, context: ContextTypes.DEFAULT_TYP
     elif type_ == 'january':
         earners = get_january_earnings(page)
         title = "🗓️ January 2025 Top Earners"
-        note = "_Earnings for January 2025 in sTLOS_"
+        payout_note = earners[0].attrs['payout_note'] if earners else ""
+        note = f"_Earnings for January 2025 in sTLOS_\n{payout_note}"
         next_callback = f'earnings_january_{page+1}'
         prev_callback = f'earnings_january_{page-1}'
     else:
