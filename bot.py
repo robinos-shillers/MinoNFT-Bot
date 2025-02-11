@@ -369,9 +369,13 @@ async def chart_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("Please provide a player name. Example: /chart Lionel Messi")
         return
 
-    chart = get_player_earnings_chart(player_name)
-    if chart:
-        keyboard = [[InlineKeyboardButton(player_name, callback_data=f'player_{player_name}')]]
+    # Get original player name with correct case from database
+    player_info = get_player_info(player_name)
+    if player_info:
+        original_name = player_info[0].split('*')[1].strip()  # Extract name from info text
+        chart = get_player_earnings_chart(original_name)
+        if chart:
+            keyboard = [[InlineKeyboardButton(original_name, callback_data=f'player_{original_name}')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
         await message.reply_photo(photo=chart, caption=f"📈 Earnings chart for {player_name}", reply_markup=reply_markup)
     else:
