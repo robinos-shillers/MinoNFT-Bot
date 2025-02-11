@@ -167,15 +167,16 @@ def get_january_earnings(page=0, items_per_page=10):
 
         # Sort by January earnings descending
         df = df.sort_values("January", ascending=False, na_position='last')
+
+        # Pagination
+        start = page * items_per_page
+        end = start + items_per_page
         
-        # Add payout note to the first record
+        # Get records with pagination
         records = df.iloc[start:end][['Player', 'January']].to_dict('records')
         if records:
             records.append({'payout_note': f"The total amount paid out in January was {total_payout} sTLOS."})
         return records
-
-        # Pagination
-        start = page * items_per_page
         end = start + items_per_page
 
         return df.iloc[start:end][['Player', 'January']].to_dict('records')
