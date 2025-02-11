@@ -166,9 +166,9 @@ async def send_filter_options(update, context, options, page, field):
     # Add pagination buttons
     pagination_buttons = []
     if page > 0:
-        pagination_buttons.append(InlineKeyboardButton("⬅️ Previous", callback_data=f'filter_prev_{page-1}'))
+        pagination_buttons.append(InlineKeyboardButton("⬅️ Previous", callback_data=f'filter_{page-1}'))
     if end < len(options):
-        pagination_buttons.append(InlineKeyboardButton("➡️ Next", callback_data=f'filter_next_{page+1}'))
+        pagination_buttons.append(InlineKeyboardButton("➡️ Next", callback_data=f'filter_{page+1}'))
 
     if pagination_buttons:
         keyboard.append(pagination_buttons)
