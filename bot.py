@@ -420,7 +420,7 @@ def create_bot():
     application.add_handler(CallbackQueryHandler(handle_sort_or_filter_selection, pattern='^(sort_|filter_(?!.*_value_).*)$'))
     application.add_handler(CallbackQueryHandler(handle_player_selection, pattern='^player_.*$'))
     application.add_handler(CallbackQueryHandler(handle_pagination, pattern='^(prev|next)_page_\d+$'))
-    application.add_handler(CallbackQueryHandler(handle_filter_pagination, pattern='^filter_(prev|next)_\d+$'))
+    application.add_handler(CallbackQueryHandler(handle_filter_pagination, pattern='^filter_\d+$'))
     application.add_handler(CallbackQueryHandler(handle_back_to_menu, pattern='^back_to_menu$'))
     application.add_handler(CallbackQueryHandler(handle_earnings_list, pattern='^earnings_.*$'))
     application.add_handler(CallbackQueryHandler(chart_command, pattern='^chart_.*$'))
@@ -447,12 +447,13 @@ async def handle_filter_pagination(update: Update, context: ContextTypes.DEFAULT
     query = update.callback_query
     await query.answer()
 
-    # Extract page number from callback data
-    page = int(query.data.split('_')[1])  # Changed to handle direct page number
+    try:
+        # Extract page number from callback data
+        page = int(query.data.split('_')[1])
 
-    if 'filter_options' not in context.user_data or 'current_filter' not in context.user_data:
-        await query.edit_message_text("❌ No filter options available.")
-        return
+        if 'filter_options' not in context.user_data or 'current_filter' not in context.user_data:
+            await query.edit_message_text("❌ No filter options available.")
+            return
 
     options = context.user_data['filter_options']
     current_filter = context.user_data['current_filter']
