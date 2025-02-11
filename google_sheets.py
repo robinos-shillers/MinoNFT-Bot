@@ -154,7 +154,7 @@ def get_january_earnings(page=0, items_per_page=10):
             return []
 
         # Get total payout from row 156
-        total_payout = df.iloc[155]["January"] if len(df) > 155 else 0
+        total_payout = df.iloc[154]["January"] if len(df) > 154 else 0
 
         # Clean Player column
         df['Player'] = df['Player'].astype(str).str.strip().str.replace('\u200b', '', regex=False)
