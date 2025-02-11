@@ -159,8 +159,8 @@ def get_january_earnings(page=0, items_per_page=10):
         # Convert January earnings to numeric
         df["January"] = pd.to_numeric(df["January"].astype(str).str.replace(r'[^\d.]', '', regex=True), errors='coerce')
 
-        # Exclude rows from index 155 onwards
-        df = df.iloc[:155]
+        # Exclude rows from index 154 onwards
+        df = df.iloc[:154]
 
         # Sort by January earnings descending
         df = df.sort_values("January", ascending=False, na_position='last')
