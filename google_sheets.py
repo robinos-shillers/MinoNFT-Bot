@@ -154,7 +154,7 @@ def get_january_earnings(page=0, items_per_page=10):
             return []
 
         # Get total payout from row 156
-        total_payout = df.iloc[154]["January"] if len(df) > 154 else 0
+        total_payout = df.iloc[155]["January"] if len(df) > 155 else 0
 
         # Clean Player column
         df['Player'] = df['Player'].astype(str).str.strip().str.replace('\u200b', '', regex=False)
@@ -173,13 +173,9 @@ def get_january_earnings(page=0, items_per_page=10):
         end = start + items_per_page
         
         # Get records with pagination
-        # Get the latest month column (assuming it's the last earnings column before any blank columns)
-        earnings_columns = [col for col in df.columns if col not in ['Player', 'Total', 'Ballon d\'Or'] and pd.notna(col)]
-        current_month = earnings_columns[-1] if earnings_columns else 'January'  # Fallback to January if no columns found
-        
-        records = df.iloc[start:end][['Player', current_month]].to_dict('records')
+        records = df.iloc[start:end][['Player', 'January']].to_dict('records')
         if records:
-            records.append({'payout_note': f"The total amount paid out in {current_month} was {total_payout} sTLOS."})
+            records.append({'payout_note': f"The total amount paid out in January was {total_payout} sTLOS."})
         return records
         end = start + items_per_page
 
