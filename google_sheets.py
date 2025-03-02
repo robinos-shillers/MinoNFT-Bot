@@ -267,7 +267,7 @@ def get_player_earnings_chart(player_name):
     if player_data.empty:
         return None
 
-    # Get weekly columns up to the blank column, including February
+    # Get weekly columns up to the blank column
     all_columns = df.columns.tolist()
     weekly_columns = []
     for col in all_columns:
@@ -276,13 +276,6 @@ def get_player_earnings_chart(player_name):
         if pd.isna(col) or col.strip() == '':  # Stop at blank column
             break
         weekly_columns.append(col)
-    
-    # Ensure February is included in the chart
-    if 'February' in all_columns and 'February' not in weekly_columns:
-        february_index = all_columns.index('February')
-        weekly_columns = all_columns[1:february_index+1]
-        # Remove 'Player', 'Total', 'Ballon d\'Or' from weekly columns if present
-        weekly_columns = [col for col in weekly_columns if col not in ['Player', 'Total', 'Ballon d\'Or']]
 
     # Convert values to numeric
     earnings = player_data[weekly_columns].iloc[0].apply(pd.to_numeric, errors='coerce')
