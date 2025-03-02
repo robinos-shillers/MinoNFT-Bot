@@ -271,7 +271,7 @@ def get_player_earnings_chart(player_name):
     all_columns = df.columns.tolist()
     weekly_columns = []
     for col in all_columns:
-        if col in ['Player', 'Total', 'Ballon d\'Or']:
+        if col in ['Player', 'Total', 'Ballon d\'Or', 'Rarity']:
             continue
         if pd.isna(col) or col.strip() == '':  # Stop at blank column
             break
