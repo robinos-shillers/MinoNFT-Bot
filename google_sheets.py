@@ -142,7 +142,47 @@ def get_retired_players():
     logging.info(f"Retired players found: {len(retired_players)}")
     return retired_players
 
-# ✅ Get January 2025 Earnings
+# ✅ Get February 2025 Earnings
+def get_february_earnings(page=0, items_per_page=10):
+    """Retrieve top earners for February 2025 from the 'Earning Distribution' sheet, ignoring rows 155+."""
+    try:
+        earnings_sheet = spreadsheet.worksheet("Earning Distribution")
+        df = pd.DataFrame(earnings_sheet.get_all_records())
+
+        if "February" not in df.columns:
+            logging.error("❌ 'February' column not found in the sheet.")
+            return []
+
+        # Get total payout from row 156
+        total_payout = df.iloc[154]["February"] if len(df) > 154 else 0
+
+        # Clean Player column
+        df['Player'] = df['Player'].astype(str).str.strip().str.replace('\u200b', '', regex=False)
+
+        # Convert February earnings to numeric
+        df["February"] = pd.to_numeric(df["February"].astype(str).str.replace(r'[^\d.]', '', regex=True), errors='coerce')
+
+        # Exclude rows from index 154 onwards
+        df = df.iloc[:153]
+
+        # Sort by February earnings descending
+        df = df.sort_values("February", ascending=False, na_position='last')
+
+        # Pagination
+        start = page * items_per_page
+        end = start + items_per_page
+
+        # Get records with pagination
+        records = df.iloc[start:end][['Player', 'February']].to_dict('records')
+        if records:
+            records.append({'payout_note': f"The total amount paid out in February was {total_payout} sTLOS."})
+        return records
+
+    except Exception as e:
+        logging.error(f"❌ Error retrieving February earnings: {str(e)}")
+        return []
+
+# Keep the January function for backward compatibility
 def get_january_earnings(page=0, items_per_page=10):
     """Retrieve top earners for January 2025 from the 'Earning Distribution' sheet, ignoring rows 155+."""
     try:
@@ -177,9 +217,6 @@ def get_january_earnings(page=0, items_per_page=10):
         if records:
             records.append({'payout_note': f"The total amount paid out in January was {total_payout} sTLOS."})
         return records
-        end = start + items_per_page
-
-        return df.iloc[start:end][['Player', 'January']].to_dict('records')
 
     except Exception as e:
         logging.error(f"❌ Error retrieving January earnings: {str(e)}")
@@ -230,7 +267,7 @@ def get_player_earnings_chart(player_name):
     if player_data.empty:
         return None
 
-    # Get weekly columns up to the blank column
+    # Get weekly columns up to the blank column, including February
     all_columns = df.columns.tolist()
     weekly_columns = []
     for col in all_columns:
@@ -239,6 +276,13 @@ def get_player_earnings_chart(player_name):
         if pd.isna(col) or col.strip() == '':  # Stop at blank column
             break
         weekly_columns.append(col)
+    
+    # Ensure February is included in the chart
+    if 'February' in all_columns and 'February' not in weekly_columns:
+        february_index = all_columns.index('February')
+        weekly_columns = all_columns[1:february_index+1]
+        # Remove 'Player', 'Total', 'Ballon d\'Or' from weekly columns if present
+        weekly_columns = [col for col in weekly_columns if col not in ['Player', 'Total', 'Ballon d\'Or']]
 
     # Convert values to numeric
     earnings = player_data[weekly_columns].iloc[0].apply(pd.to_numeric, errors='coerce')
@@ -287,11 +331,11 @@ def get_current_season_earners(page=0, items_per_page=10):
     earnings_sheet = client.open("Mino Football Earnings - 2024/25").worksheet("Earning Distribution")
     df = pd.DataFrame(earnings_sheet.get_all_records())
 
-    # Get the player with highest January earnings
-    january_df = df.copy()
-    january_df["January"] = pd.to_numeric(january_df["January"].astype(str).str.replace(r'[^\d.]', '', regex=True), errors='coerce')
-    january_df = january_df.iloc[:154]  # Exclude rows 155+
-    top_january_player = january_df.nlargest(1, "January")["Player"].iloc[0] if not january_df.empty else None
+    # Get the player with highest February earnings
+    february_df = df.copy()
+    february_df["February"] = pd.to_numeric(february_df["February"].astype(str).str.replace(r'[^\d.]', '', regex=True), errors='coerce')
+    february_df = february_df.iloc[:154]  # Exclude rows 155+
+    top_february_player = february_df.nlargest(1, "February")["Player"].iloc[0] if not february_df.empty else None
 
     # Clean only Player column
     df['Player'] = df['Player'].astype(str).str.strip().str.replace('\u200b', '')
@@ -308,8 +352,8 @@ def get_current_season_earners(page=0, items_per_page=10):
     start = page * items_per_page
     end = start + items_per_page
 
-    # Mark the top January earner
+    # Mark the top February earner
     result_df = df.iloc[start:end][['Player', season_col]].copy()
-    result_df['top_january'] = result_df['Player'] == top_january_player
+    result_df['top_february'] = result_df['Player'] == top_february_player
 
     return result_df.to_dict('records')

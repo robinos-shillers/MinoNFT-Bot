@@ -291,7 +291,7 @@ async def earnings_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
         [InlineKeyboardButton("💰 All-Time Top Earners", callback_data='earnings_alltime_0')],
         [InlineKeyboardButton("📈 2024/25 Top Earners", callback_data='earnings_current_0')],
-        [InlineKeyboardButton("🗓️ January 2025 Top Earners", callback_data='earnings_january_0')]
+        [InlineKeyboardButton("🗓️ February 2025 Top Earners", callback_data='earnings_february_0')]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text("View top earners:", reply_markup=reply_markup)
@@ -318,14 +318,14 @@ async def handle_earnings_list(update: Update, context: ContextTypes.DEFAULT_TYP
         # Add fire emoji to top earner if this is the first page
         if page == 0 and earners:
             earners[0]['is_top'] = True
-    elif type_ == 'january':
-        earners = get_january_earnings(page)
-        title = "🗓️ January 2025 Top Earners"
+    elif type_ == 'february':
+        earners = get_february_earnings(page)
+        title = "🗓️ February 2025 Top Earners"
         payout_note = earners[-1].get('payout_note', '') if earners else ''
         earners = [e for e in earners if 'payout_note' not in e]  # Remove payout note from display list
-        note = f"_Earnings for January 2025 in sTLOS_\n{payout_note}"
-        next_callback = f'earnings_january_{page+1}'
-        prev_callback = f'earnings_january_{page-1}'
+        note = f"_Earnings for February 2025 in sTLOS_\n{payout_note}"
+        next_callback = f'earnings_february_{page+1}'
+        prev_callback = f'earnings_february_{page-1}'
     else:
         return
 
@@ -335,12 +335,12 @@ async def handle_earnings_list(update: Update, context: ContextTypes.DEFAULT_TYP
 
     message = f"*{title}*\n{note}\n\n"
     for i, player in enumerate(earners, 1):
-        if type_ == 'january':
-            earnings = player.get('January', 0)
+        if type_ == 'february':
+            earnings = player.get('February', 0)
             message += f"{i}. *{player['Player']}* - {earnings} sTLOS\n"
         else:
             earnings = player.get('Total Earnings' if type_ == 'alltime' else 'Total minus Ballon d\'Or', 0)
-            fire_emoji = " 🔥" if type_ == 'current' and player.get('top_january') else ""
+            fire_emoji = " 🔥" if type_ == 'current' and player.get('top_february') else ""
             message += f"{i}. *{player['Player']}* - {earnings}{fire_emoji}\n"
 
     keyboard = []
