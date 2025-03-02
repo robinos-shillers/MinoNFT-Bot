@@ -12,7 +12,7 @@ from google_sheets import (
     get_top_earners,
     get_current_season_earners,
     get_player_earnings_chart,
-    get_january_earnings
+    get_february_earnings
 )
 import os
 
