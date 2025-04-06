@@ -325,7 +325,7 @@ async def handle_earnings_list(update: Update, context: ContextTypes.DEFAULT_TYP
         earners = [e for e in earners if 'payout_note' not in e]  # Remove payout note from display list
         note = f"_Earnings for March 2025 in sTLOS_\n{payout_note}"
         next_callback = f'earnings_march_{page+1}'
-        prev_callback = f'earnings_march_{page-1}'
+        prev_callback = f'earnings_march_{page-1}'ge-1}'
     else:
         return
 
