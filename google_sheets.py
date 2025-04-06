@@ -173,7 +173,8 @@ def get_march_earnings(page=0, items_per_page=10):
         start = page * items_per_page
         end = start + items_per_page
 
-        # Get records with pagination
+        # Format records with numeric March values
+        df['March'] = pd.to_numeric(df['March'].astype(str).str.replace(r'[^\d.]', '', regex=True), errors='coerce')
         records = df.iloc[start:end][['Player', 'March']].to_dict('records')
         if records:
             records.append({'payout_note': f"The total amount paid out in March was {total_payout} sTLOS."})
@@ -323,7 +324,7 @@ def get_top_earners(page=0, items_per_page=10):
 def get_current_season_earners(page=0, items_per_page=10):
     """Retrieve top earners for current season based on Total minus Ballon d'Or."""
     earnings_sheet = client.open("Mino Football Earnings - 2024/25").worksheet("Earning Distribution")
-    
+
     # Specify expected headers to handle duplicates
     expected_headers = ['Player', 'Total minus Ballon d\'Or', 'January', 'February', 'March']
     df = pd.DataFrame(earnings_sheet.get_all_records(expected_headers=expected_headers))
