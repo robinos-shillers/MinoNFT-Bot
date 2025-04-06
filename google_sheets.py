@@ -334,12 +334,6 @@ def get_current_season_earners(page=0, items_per_page=10):
     expected_headers = ['Player', 'Total minus Ballon d\'Or', 'January', 'February', 'March']
     df = pd.DataFrame(earnings_sheet.get_all_records(expected_headers=expected_headers))
 
-    # Get the player with highest March earnings
-    march_df = df.copy()
-    march_df["March"] = pd.to_numeric(march_df["March"].astype(str).str.replace(r'[^\d.]', '', regex=True), errors='coerce')
-    march_df = march_df.iloc[:154]  # Exclude rows 155+
-    top_march_player = march_df.nlargest(1, "March")["Player"].iloc[0] if not march_df.empty else None
-
     # Clean only Player column
     df['Player'] = df['Player'].astype(str).str.strip().str.replace('\u200b', '')
 
@@ -355,8 +349,6 @@ def get_current_season_earners(page=0, items_per_page=10):
     start = page * items_per_page
     end = start + items_per_page
 
-    # Mark the top February earner
+    # Get records for this page
     result_df = df.iloc[start:end][['Player', season_col]].copy()
-    result_df['top_february'] = result_df['Player'] == top_february_player
-
     return result_df.to_dict('records')
