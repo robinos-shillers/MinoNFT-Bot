@@ -320,16 +320,33 @@ async def handle_earnings_list(update: Update, context: ContextTypes.DEFAULT_TYP
             earners[0]['is_top'] = True
     elif type_ == 'march':
         earners = get_march_earnings(page)
+        if not earners:
+            await query.edit_message_text("❌ No earnings data available.")
+            return
+            
         title = "🗓️ March 2025 Top Earners"
         payout_note = earners[-1].get('payout_note', '') if earners else ''
         earners = [e for e in earners if 'payout_note' not in e]  # Remove payout note from display list
         note = f"_Earnings for March 2025 in sTLOS_\n{payout_note}"
         next_callback = f'earnings_march_{page+1}'
         prev_callback = f'earnings_march_{page-1}'
-        
+
         message = f"*{title}*\n{note}\n\n"
         for i, player in enumerate(earners, 1):
             message += f"{i}. *{player['Player']}* - {player['March']} sTLOS\n"
+        
+        keyboard = []
+        if page > 0:
+            keyboard.append(InlineKeyboardButton("⬅️ Previous", callback_data=prev_callback))
+        if len(earners) == ITEMS_PER_PAGE:
+            keyboard.append(InlineKeyboardButton("➡️ Next", callback_data=next_callback))
+
+        if keyboard:
+            reply_markup = InlineKeyboardMarkup([keyboard])
+            await query.edit_message_text(message, reply_markup=reply_markup, parse_mode="Markdown")
+        else:
+            await query.edit_message_text(message, parse_mode="Markdown")
+        return
     else:
         return
 

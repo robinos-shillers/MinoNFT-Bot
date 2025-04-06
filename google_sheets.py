@@ -173,11 +173,13 @@ def get_march_earnings(page=0, items_per_page=10):
         start = page * items_per_page
         end = start + items_per_page
 
-        # Convert March column to numeric and handle any non-numeric values
-        df['March'] = pd.to_numeric(df['March'].replace('[\$,]', '', regex=True), errors='coerce')
+        # Clean and convert March column to numeric
+        df['March'] = df['March'].astype(str).replace('[\$,]', '', regex=True)
+        df['March'] = pd.to_numeric(df['March'], errors='coerce')
+        df = df[df['March'] > 0]  # Keep only positive earnings
         df = df.sort_values('March', ascending=False)
-        df = df[df['March'].notna()]  # Remove rows with NaN values
         df['March'] = df['March'].round(2)  # Round to 2 decimal places
+        
         records = df.iloc[start:end][['Player', 'March']].to_dict('records')
         if records:
             records.append({'payout_note': f"The total amount paid out in March was {total_payout} sTLOS."})
