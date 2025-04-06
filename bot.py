@@ -326,6 +326,10 @@ async def handle_earnings_list(update: Update, context: ContextTypes.DEFAULT_TYP
         note = f"_Earnings for March 2025 in sTLOS_\n{payout_note}"
         next_callback = f'earnings_march_{page+1}'
         prev_callback = f'earnings_march_{page-1}'
+        
+        message = f"*{title}*\n{note}\n\n"
+        for i, player in enumerate(earners, 1):
+            message += f"{i}. *{player['Player']}* - {player['March']} sTLOS\n"
     else:
         return
 
