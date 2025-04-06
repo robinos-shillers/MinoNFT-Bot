@@ -147,7 +147,8 @@ def get_march_earnings(page=0, items_per_page=10):
     """Retrieve top earners for March 2025 from the 'Earning Distribution' sheet, ignoring rows 155+."""
     try:
         earnings_sheet = spreadsheet.worksheet("Earning Distribution")
-        df = pd.DataFrame(earnings_sheet.get_all_records())
+        expected_headers = ['Player', 'March']
+        df = pd.DataFrame(earnings_sheet.get_all_records(expected_headers=expected_headers))
 
         if "March" not in df.columns:
             logging.error("❌ 'March' column not found in the sheet.")
@@ -322,13 +323,16 @@ def get_top_earners(page=0, items_per_page=10):
 def get_current_season_earners(page=0, items_per_page=10):
     """Retrieve top earners for current season based on Total minus Ballon d'Or."""
     earnings_sheet = client.open("Mino Football Earnings - 2024/25").worksheet("Earning Distribution")
-    df = pd.DataFrame(earnings_sheet.get_all_records())
+    
+    # Specify expected headers to handle duplicates
+    expected_headers = ['Player', 'Total minus Ballon d\'Or', 'January', 'February', 'March']
+    df = pd.DataFrame(earnings_sheet.get_all_records(expected_headers=expected_headers))
 
-    # Get the player with highest February earnings
-    february_df = df.copy()
-    february_df["February"] = pd.to_numeric(february_df["February"].astype(str).str.replace(r'[^\d.]', '', regex=True), errors='coerce')
-    february_df = february_df.iloc[:154]  # Exclude rows 155+
-    top_february_player = february_df.nlargest(1, "February")["Player"].iloc[0] if not february_df.empty else None
+    # Get the player with highest March earnings
+    march_df = df.copy()
+    march_df["March"] = pd.to_numeric(march_df["March"].astype(str).str.replace(r'[^\d.]', '', regex=True), errors='coerce')
+    march_df = march_df.iloc[:154]  # Exclude rows 155+
+    top_march_player = march_df.nlargest(1, "March")["Player"].iloc[0] if not march_df.empty else None
 
     # Clean only Player column
     df['Player'] = df['Player'].astype(str).str.strip().str.replace('\u200b', '')
