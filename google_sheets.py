@@ -142,44 +142,44 @@ def get_retired_players():
     logging.info(f"Retired players found: {len(retired_players)}")
     return retired_players
 
-# ✅ Get February 2025 Earnings
-def get_february_earnings(page=0, items_per_page=10):
-    """Retrieve top earners for February 2025 from the 'Earning Distribution' sheet, ignoring rows 155+."""
+# ✅ Get March 2025 Earnings
+def get_march_earnings(page=0, items_per_page=10):
+    """Retrieve top earners for March 2025 from the 'Earning Distribution' sheet, ignoring rows 155+."""
     try:
         earnings_sheet = spreadsheet.worksheet("Earning Distribution")
         df = pd.DataFrame(earnings_sheet.get_all_records())
 
-        if "February" not in df.columns:
-            logging.error("❌ 'February' column not found in the sheet.")
+        if "March" not in df.columns:
+            logging.error("❌ 'March' column not found in the sheet.")
             return []
 
         # Get total payout from row 156
-        total_payout = df.iloc[154]["February"] if len(df) > 154 else 0
+        total_payout = df.iloc[154]["March"] if len(df) > 154 else 0
 
         # Clean Player column
         df['Player'] = df['Player'].astype(str).str.strip().str.replace('\u200b', '', regex=False)
 
-        # Convert February earnings to numeric
-        df["February"] = pd.to_numeric(df["February"].astype(str).str.replace(r'[^\d.]', '', regex=True), errors='coerce')
+        # Convert March earnings to numeric
+        df["March"] = pd.to_numeric(df["March"].astype(str).str.replace(r'[^\d.]', '', regex=True), errors='coerce')
 
         # Exclude rows from index 154 onwards
         df = df.iloc[:153]
 
-        # Sort by February earnings descending
-        df = df.sort_values("February", ascending=False, na_position='last')
+        # Sort by March earnings descending
+        df = df.sort_values("March", ascending=False, na_position='last')
 
         # Pagination
         start = page * items_per_page
         end = start + items_per_page
 
         # Get records with pagination
-        records = df.iloc[start:end][['Player', 'February']].to_dict('records')
+        records = df.iloc[start:end][['Player', 'March']].to_dict('records')
         if records:
-            records.append({'payout_note': f"The total amount paid out in February was {total_payout} sTLOS."})
+            records.append({'payout_note': f"The total amount paid out in March was {total_payout} sTLOS."})
         return records
 
     except Exception as e:
-        logging.error(f"❌ Error retrieving February earnings: {str(e)}")
+        logging.error(f"❌ Error retrieving March earnings: {str(e)}")
         return []
 
 # Keep the January function for backward compatibility
